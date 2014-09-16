@@ -1,0 +1,62 @@
+﻿CREATE PROCEDURE [dbo].[UpdateCustomerPayments]
+    @OldCustomerPaymentID int,
+    @InquiryNumber nvarchar(50),
+    @InvoiceNumber nvarchar(50),
+    @PaymentNumber int,
+    @PaidAmount decimal(18,2),
+    @PaidAmountCurrencyID int,
+    @PaidAmountRateToEuro decimal(18,2),
+    @PaidAmountInEuro decimal(18,2),
+    @PaidAmountRateDate datetime,
+    @ONDate datetime,
+    @SumPaid decimal(18,2),
+    @Deduction bit,
+    @DeductionNumber int,
+    @DeductionAmount decimal(18,2),
+    @DeductionAmountCurrencyID int,
+    @DeductionAmountRateToEuro decimal(18,2),
+    @DeductionAmountInEuro decimal(18,2),
+    @DeductionAmountRateDate datetime,
+    @Reason ntext,
+    @SumDeduction decimal(18,2),
+    @RestPayment decimal(18,2),
+    @Comment ntext,
+    @UserName nvarchar(50),
+    @ModifiedDate datetime,
+	
+	@IsPaid	bit,
+	@Amount	decimal(18, 2),
+	@CurrencyID	int	
+AS
+UPDATE [dbo].[CustomerPayments]
+SET
+    InquiryNumber = @InquiryNumber,
+    InvoiceNumber = @InvoiceNumber,
+    PaymentNumber = @PaymentNumber,
+    PaidAmount = @PaidAmount,
+    PaidAmountCurrencyID = @PaidAmountCurrencyID,
+    PaidAmountRateToEuro = @PaidAmountRateToEuro,
+    PaidAmountInEuro = @PaidAmountInEuro,
+    PaidAmountRateDate = @PaidAmountRateDate,
+    ONDate = @ONDate,
+    SumPaid = @SumPaid,
+    Deduction = @Deduction,
+    DeductionNumber = @DeductionNumber,
+    DeductionAmount = @DeductionAmount,
+    DeductionAmountCurrencyID = @DeductionAmountCurrencyID,
+    DeductionAmountRateToEuro = @DeductionAmountRateToEuro,
+    DeductionAmountInEuro = @DeductionAmountInEuro,
+    DeductionAmountRateDate = @DeductionAmountRateDate,
+    Reason = @Reason,
+    SumDeduction = @SumDeduction,
+    RestPayment = @RestPayment,
+    Comment = @Comment,
+    UserName = @UserName,
+    ModifiedDate = @ModifiedDate,
+	IsPaid = @IsPaid,
+	Amount = @Amount,
+	CurrencyID = @CurrencyID
+WHERE [CustomerPaymentID] = @OLDCustomerPaymentID
+IF @@ROWCOUNT > 0
+Select * From CustomerPayments 
+Where [CustomerPaymentID] = @OLDCustomerPaymentID

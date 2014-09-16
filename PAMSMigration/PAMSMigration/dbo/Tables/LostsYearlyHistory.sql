@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[LostsYearlyHistory] (
+    [LostID]                INT             NOT NULL,
+    [InquiryNumber]         NVARCHAR (50)   NOT NULL,
+    [Comment]               NTEXT           NULL,
+    [UserName]              NVARCHAR (50)   NULL,
+    [ModifiedDate]          DATETIME        NULL,
+    [WinnerName]            NVARCHAR (150)  NULL,
+    [WinnerPrice]           MONEY           NULL,
+    [WinnerPriceInEuro]     MONEY           NULL,
+    [RateToEuro]            DECIMAL (18, 2) NULL,
+    [RateDate]              DATETIME        NULL,
+    [IsSubLost]             BIT             NULL,
+    [ParentInquiryNumber]   NVARCHAR (50)   NULL,
+    [LostComment]           NVARCHAR (100)  NULL,
+    [LostPrice]             DECIMAL (18, 4) NULL,
+    [LostPriceRateToEuro]   DECIMAL (18, 4) NULL,
+    [LostPriceRateDate]     DATETIME        NULL,
+    [LostPriceInEuro]       DECIMAL (18, 4) NULL,
+    [WinnerPriceCurrencyID] INT             NULL,
+    [LostPriceCurrencyID]   INT             NULL,
+    [LostReasonID]          INT             NULL,
+    CONSTRAINT [PK_LostsYearlyHistory] PRIMARY KEY CLUSTERED ([LostID] ASC),
+    CONSTRAINT [FK_LostsYearlyHistory_Currencies] FOREIGN KEY ([LostPriceCurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_LostsYearlyHistory_Currencies1] FOREIGN KEY ([WinnerPriceCurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_LostsYearlyHistory_InquiriesYearlyHistory] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[InquiriesYearlyHistory] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_LostsYearlyHistory_LostReasons] FOREIGN KEY ([LostReasonID]) REFERENCES [dbo].[LostReasons] ([ID])
+);
+

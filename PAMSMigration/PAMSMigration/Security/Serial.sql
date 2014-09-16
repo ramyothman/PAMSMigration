@@ -1,0 +1,3 @@
+﻿CREATE SCHEMA [Serial]
+    AUTHORIZATION [dbo];
+

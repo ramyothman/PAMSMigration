@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[Losts] (
+    [LostID]                INT             IDENTITY (1, 1) NOT NULL,
+    [InquiryNumber]         NVARCHAR (50)   NOT NULL,
+    [LostReasonID]          INT             NULL,
+    [Comment]               NTEXT           NULL,
+    [UserName]              NVARCHAR (50)   NULL,
+    [ModifiedDate]          DATETIME        NULL,
+    [WinnerName]            NVARCHAR (150)  NULL,
+    [WinnerPrice]           MONEY           NULL,
+    [WinnerPriceInEuro]     MONEY           NULL,
+    [RateToEuro]            DECIMAL (18, 2) NULL,
+    [RateDate]              DATETIME        NULL,
+    [WinnerPriceCurrencyID] INT             NULL,
+    [IsSubLost]             BIT             NULL,
+    [ParentInquiryNumber]   NVARCHAR (50)   NULL,
+    [LostComment]           NVARCHAR (100)  NULL,
+    [LostPrice]             DECIMAL (18, 4) NULL,
+    [LostPriceCurrencyID]   INT             NULL,
+    [LostPriceRateToEuro]   DECIMAL (18, 4) NULL,
+    [LostPriceRateDate]     DATETIME        NULL,
+    [LostPriceInEuro]       DECIMAL (18, 4) NULL,
+    CONSTRAINT [PK_Losts] PRIMARY KEY CLUSTERED ([LostID] ASC),
+    CONSTRAINT [FK_Losts_Currencies] FOREIGN KEY ([LostPriceCurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_Losts_Currencies1] FOREIGN KEY ([WinnerPriceCurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_Losts_Inquiries] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[Inquiries] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Losts_LostReasons] FOREIGN KEY ([LostReasonID]) REFERENCES [dbo].[LostReasons] ([ID])
+);
+

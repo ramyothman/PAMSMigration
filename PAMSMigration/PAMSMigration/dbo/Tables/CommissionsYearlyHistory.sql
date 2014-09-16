@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[CommissionsYearlyHistory] (
+    [InquiryNumber]                 NVARCHAR (50)   NOT NULL,
+    [PriceCommissionBase]           MONEY           NULL,
+    [PercentPriceCommissionBase]    DECIMAL (18, 3) NULL,
+    [CommissionPercent]             DECIMAL (18, 3) NULL,
+    [CommissionAmount]              MONEY           NULL,
+    [RateToEuro]                    DECIMAL (18, 3) NULL,
+    [ONDate]                        DATETIME        NULL,
+    [CommissionAmountInEuro]        MONEY           NULL,
+    [Comment]                       NTEXT           NULL,
+    [Paid]                          BIT             NULL,
+    [UserName]                      NVARCHAR (50)   NULL,
+    [ModifiedDate]                  DATETIME        NULL,
+    [MinPriceCommissionBase]        MONEY           NULL,
+    [MinPercentPriceCommissionBase] DECIMAL (18, 3) NULL,
+    [MinCommissionAmount]           MONEY           NULL,
+    [MinPercentCommissionAmount]    DECIMAL (18, 3) NULL,
+    [BankID]                        INT             NULL,
+    [CurrencyID]                    INT             NULL,
+    CONSTRAINT [PK_CommissionsYearlyHistory] PRIMARY KEY CLUSTERED ([InquiryNumber] ASC),
+    CONSTRAINT [FK_CommissionsYearlyHistory_Banks] FOREIGN KEY ([BankID]) REFERENCES [dbo].[Banks] ([ID]),
+    CONSTRAINT [FK_CommissionsYearlyHistory_Currencies] FOREIGN KEY ([CurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_CommissionsYearlyHistory_InquiriesYearlyHistory] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[InquiriesYearlyHistory] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE
+);
+

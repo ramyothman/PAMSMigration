@@ -1,0 +1,51 @@
+﻿CREATE VIEW [dbo].[ViewProjectInquiryLostOrderDeliveredYearlyHistory]
+AS
+SELECT     dbo.ViewProjectInquiryLostYearlyHistory.ProjectSerialNumber, dbo.ViewProjectInquiryLostYearlyHistory.ShotecNo, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ResponsibleEngineer, dbo.ViewProjectInquiryLostYearlyHistory.ClientName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ClientWebsite, dbo.ViewProjectInquiryLostYearlyHistory.ClientInquiryNumber, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.InquiryDate, dbo.ViewProjectInquiryLostYearlyHistory.ProjectStatus, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.InquiryTypeID, dbo.ViewProjectInquiryLostYearlyHistory.SupplierName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.SupplierQuotationNumber, dbo.ViewProjectInquiryLostYearlyHistory.QuotationPrice, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.QuotationCurrency, dbo.ViewProjectInquiryLostYearlyHistory.QuotationRateToEURO, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.QuotationRateDate, dbo.ViewProjectInquiryLostYearlyHistory.QuotationPriceInEuro, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.BidDueDate, dbo.ViewProjectInquiryLostYearlyHistory.OnHold, dbo.ViewProjectInquiryLostYearlyHistory.ModifiedDate, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.UserName, dbo.ViewProjectInquiryLostYearlyHistory.ProjectName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ProjectLocation, dbo.ViewProjectInquiryLostYearlyHistory.ProjectOwnerName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ProjectDescription, dbo.ViewProjectInquiryLostYearlyHistory.ProductName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.CategoryName, dbo.ViewProjectInquiryLostYearlyHistory.ProductDescription, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ProjectComment, dbo.ViewProjectInquiryLostYearlyHistory.ReasonName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostReasonID, dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerName, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerPrice, dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerPriceInEuro, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerRateToEuro, dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerRateDate, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerPriceCurrencyID, dbo.OrdersYearlyHistory.OrderNumber AS ShotecOrderNumber, 
+                      dbo.OrdersYearlyHistory.CustomerOrderNumber, dbo.OrdersYearlyHistory.SupplierOrderNumber, dbo.OrdersYearlyHistory.DeliveryTime, 
+                      dbo.OrdersYearlyHistory.DeliveredON, dbo.OrdersYearlyHistory.Delivered, dbo.OrdersYearlyHistory.ExpansionDeliveryDate AS ExpectedDeliveryDate, 
+                      dbo.OrdersYearlyHistory.PaymentTypeID, dbo.OrdersYearlyHistory.PriceBaseID, dbo.OrdersYearlyHistory.Price AS OrderPrice, 
+                      dbo.OrdersYearlyHistory.CurrencyID AS OrderCurrencyID, dbo.OrdersYearlyHistory.RateToEuro AS OrderRateToEuro, 
+                      dbo.OrdersYearlyHistory.ONDate AS OrderRateDate, dbo.OrdersYearlyHistory.PriceInEuro AS OrderPriceInEuro, dbo.OrdersYearlyHistory.OrderDate, 
+                      dbo.OrdersYearlyHistory.PriceCommissionBase AS OrderPriceCommissionBase, 
+                      dbo.OrdersYearlyHistory.PercentPriceCommissionBase AS OrderPercentPriceCommissionBase, dbo.ViewProjectInquiryLostYearlyHistory.InquiryStatus, 
+                      dbo.OrderStatus.Name AS OrderStatus, dbo.ViewProjectInquiryLostYearlyHistory.SupplierID, dbo.ViewProjectInquiryLostYearlyHistory.LostDate, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ProjectTypeID, dbo.ViewProjectInquiryLostYearlyHistory.OfferDate, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ParentInquiryNumber, dbo.OrdersYearlyHistory.ParentOrderNumber, dbo.OrdersYearlyHistory.IsSubOrder, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.IsSubOffer, dbo.ViewProjectInquiryLostYearlyHistory.IsSubLost, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostParentInquiryNumber, dbo.ViewProjectInquiryLostYearlyHistory.CustomerID, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostComment, dbo.ViewProjectInquiryLostYearlyHistory.ProductType, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ProductTypeID, dbo.ViewProjectInquiryLostYearlyHistory.OrderPercentage, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostPercentage, dbo.ViewProjectInquiryLostYearlyHistory.CancelledPercentage, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LateResponsePercentage, dbo.OrdersYearlyHistory.BackLog, dbo.ViewProjectInquiryLostYearlyHistory.OrderChanceID, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.OrderChance, dbo.ViewProjectInquiryLostYearlyHistory.InquiryHasGuarantee, 
+                      dbo.OrdersYearlyHistory.CompletedGoodsPaidON, dbo.OrdersYearlyHistory.IsCompletedGoodsPaid, dbo.OrdersYearlyHistory.HasGuarantee AS OrderHasGuarantee, 
+                      dbo.OrdersYearlyHistory.OrderStatusID, dbo.ViewProjectInquiryLostYearlyHistory.CompanyCode, dbo.ViewProjectInquiryLostYearlyHistory.ProjectID, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.InquiryType, dbo.ViewProjectInquiryLostYearlyHistory.QuotationCurrencyCode, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.LostWinnerPriceCurrencyCode, dbo.Currencies.CurrencyCode AS OrderCurrencyCode, dbo.PriceBase.PriceBaseCode, 
+                      dbo.PaymentTypes.PaymentType, dbo.ViewProjectInquiryLostYearlyHistory.LanguageId, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ResponsibleEngineerDisplayName, dbo.ViewProjectInquiryLostYearlyHistory.ResponsibleEngineerID, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.ReasonCode AS LostReasonCode, dbo.ViewProjectInquiryLostYearlyHistory.Year, 
+                      dbo.ViewProjectInquiryLostYearlyHistory.BranchID
+FROM         dbo.OrdersYearlyHistory INNER JOIN
+                      dbo.Currencies ON dbo.OrdersYearlyHistory.CurrencyID = dbo.Currencies.ID INNER JOIN
+                      dbo.PaymentTypes ON dbo.OrdersYearlyHistory.PaymentTypeID = dbo.PaymentTypes.ID INNER JOIN
+                      dbo.PriceBase ON dbo.OrdersYearlyHistory.PriceBaseID = dbo.PriceBase.ID LEFT OUTER JOIN
+                      dbo.OrderStatus ON dbo.OrdersYearlyHistory.OrderStatusID = dbo.OrderStatus.ID RIGHT OUTER JOIN
+                      dbo.ViewProjectInquiryLostYearlyHistory ON dbo.OrdersYearlyHistory.InquiryNumber = dbo.ViewProjectInquiryLostYearlyHistory.ProjectSerialNumber

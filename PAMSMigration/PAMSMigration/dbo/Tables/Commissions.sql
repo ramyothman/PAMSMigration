@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[Commissions] (
+    [CustomerPaymentID]             INT             NOT NULL,
+    [InquiryNumber]                 NVARCHAR (50)   NOT NULL,
+    [PriceCommissionBase]           MONEY           NULL,
+    [PercentPriceCommissionBase]    DECIMAL (18, 3) NULL,
+    [CommissionPercent]             DECIMAL (18, 3) NULL,
+    [CommissionAmount]              MONEY           NULL,
+    [CurrencyID]                    INT             NULL,
+    [RateToEuro]                    DECIMAL (18, 3) NULL,
+    [ONDate]                        DATETIME        NULL,
+    [CommissionAmountInEuro]        MONEY           NULL,
+    [BankID]                        INT             NULL,
+    [Comment]                       NTEXT           NULL,
+    [Paid]                          BIT             NULL,
+    [UserName]                      NVARCHAR (50)   NULL,
+    [ModifiedDate]                  DATETIME        NULL,
+    [MinPriceCommissionBase]        MONEY           NULL,
+    [MinPercentPriceCommissionBase] DECIMAL (18, 3) NULL,
+    [MinCommissionAmount]           MONEY           NULL,
+    [MinPercentCommissionAmount]    DECIMAL (18, 3) NULL,
+    [BranchID]                      INT             NULL,
+    CONSTRAINT [PK_Commissions] PRIMARY KEY CLUSTERED ([CustomerPaymentID] ASC, [InquiryNumber] ASC),
+    CONSTRAINT [FK_Commissions_Banks] FOREIGN KEY ([BankID]) REFERENCES [dbo].[Banks] ([ID]),
+    CONSTRAINT [FK_Commissions_Currencies] FOREIGN KEY ([CurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_Commissions_CustomerPayments] FOREIGN KEY ([CustomerPaymentID]) REFERENCES [dbo].[CustomerPayments] ([CustomerPaymentID]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Commissions_Inquiries] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[Inquiries] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
