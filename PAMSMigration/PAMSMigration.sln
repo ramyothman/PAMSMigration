@@ -5,6 +5,10 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "PAMSMigration", "PAMSMigration\PAMSMigration.sqlproj", "{30A0AF9B-EBF9-4B7C-B3B6-8C30EADE91CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{6ACED250-BBC6-4F1B-8672-7AB61987545F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrationApplication", "MigrationApplication\MigrationApplication.csproj", "{3D9B2DDD-B499-44DC-9477-72DBDD4F8965}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +21,14 @@ Global
 		{30A0AF9B-EBF9-4B7C-B3B6-8C30EADE91CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30A0AF9B-EBF9-4B7C-B3B6-8C30EADE91CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{30A0AF9B-EBF9-4B7C-B3B6-8C30EADE91CF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{6ACED250-BBC6-4F1B-8672-7AB61987545F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ACED250-BBC6-4F1B-8672-7AB61987545F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ACED250-BBC6-4F1B-8672-7AB61987545F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ACED250-BBC6-4F1B-8672-7AB61987545F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D9B2DDD-B499-44DC-9477-72DBDD4F8965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D9B2DDD-B499-44DC-9477-72DBDD4F8965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D9B2DDD-B499-44DC-9477-72DBDD4F8965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D9B2DDD-B499-44DC-9477-72DBDD4F8965}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
