@@ -218,5 +218,25 @@ namespace Common.Entities.MetaDataSchema
         }
 
         #endregion
+
+        public static Column GetByName(List<Column> columns, string searchName)
+        {
+            foreach (Column col in columns)
+            {
+                if (col.Name == searchName)
+                    return col;
+            }
+            return null;
+        }
+
+        public static Column GetByPrimaryKey(List<Column> columns)
+        {
+            foreach (Column col in columns)
+            {
+                if (col.IsPrimary)
+                    return col;
+            }
+            return null;
+        }
     }
 }

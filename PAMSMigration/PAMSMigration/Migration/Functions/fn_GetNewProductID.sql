@@ -7,25 +7,25 @@
 RETURNS int
 AS
 BEGIN
-	declare @NewProductID int
-	set @NewProductID=0
+	declare @NewCatID int
+	set @NewCatID=null
 	if @EgyptID <>0
 	begin
-	select @NewProductID =  ProductID from dbo.Products
-	where EgyptID=@EgyptID
+	select @NewCatID =  CategoryID from Category
+	where EgyptProductID=@EgyptID
 	end
 	else begin
 	if @RPEID <>0
 	begin
-	select @NewProductID =  ProductID from dbo.Products
-	where RPEID=@RPEID
+	select @NewCatID =  CategoryID from Category
+	where RPEProductID=@RPEID
 	end
 	
 	else if @QatarID <>0
 	begin
-	select @NewProductID =  ProductID from dbo.Products
-	where QatarID=@QatarID
+	select @NewCatID =  CategoryID from Category
+	where QatarProductID=@QatarID
 	end
 	end
-	return @NewProductID
+	return @NewCatID
 END

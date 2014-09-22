@@ -35,6 +35,9 @@
     [EgyptID]     INT            NULL,
     [RPEID]       INT            NULL,
     [QatarID]     INT            NULL,
+    [EgyptProductID] INT NULL, 
+    [RPEProductID] INT NULL, 
+    [QatarProductID] INT NULL, 
     CONSTRAINT [PK_Category] PRIMARY KEY CLUSTERED ([CategoryID] ASC),
     CONSTRAINT [FK_Category_Category1] FOREIGN KEY ([Category2ID]) REFERENCES [dbo].[Category] ([CategoryID])
 );

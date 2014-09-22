@@ -119,6 +119,16 @@ namespace Common.Entities.MetaDataSchema
             return null;
         }
 
+        public static Table GetByNameandSchema(List<Table> tables, string searchName, string searchSchema)
+        {
+            foreach (Table row in tables)
+            {
+                if (row.Name == searchName && row.Schema == searchSchema)
+                    return row;
+            }
+            return null;
+        }
+
         public bool HasPrimaryKey
         {
             get
