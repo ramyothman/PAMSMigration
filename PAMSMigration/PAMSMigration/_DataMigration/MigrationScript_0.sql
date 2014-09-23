@@ -16,16 +16,7 @@ SET IDENTITY_INSERT [dbo].[CompanyCountries] OFF
 
 GO
 
--- Data Migration for Table dbo.VacationTypes --
 
-SET IDENTITY_INSERT [dbo].[VacationTypes] ON
-
-insert into [dbo].[VacationTypes] (VacationTypeId,VacationTypeName,UserName,ModifiedDate)
-select VacationTypeId,VacationTypeName,UserName,ModifiedDate from [PAMSDB].[dbo].[VacationTypes] 
-
-SET IDENTITY_INSERT [dbo].[VacationTypes] OFF
-
-GO
 
 -- Data Migration for Table dbo.Currencies --
 

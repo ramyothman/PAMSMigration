@@ -5,6 +5,9 @@
     [EgyptBusinessEntityID] INT              NULL,
     [RPEBusinessEntityID]   INT              NULL,
     [QatarBusinessEntityID] INT              NULL,
+    [SupplierEgyptID] INT NULL, 
+    [SupplierQatarID] INT NULL, 
+    [SupplierRPEID] INT NULL, 
     CONSTRAINT [PK_BusinessEntity] PRIMARY KEY CLUSTERED ([BusinessEntityId] ASC)
 );
 

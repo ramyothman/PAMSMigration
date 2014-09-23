@@ -12,13 +12,14 @@
   <xs:element name="SchemaDS" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="SchemaDS" msprop:Generator_UserDSName="SchemaDS">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="TableSchema" msprop:Generator_TableClassName="TableSchemaDataTable" msprop:Generator_TableVarName="tableTableSchema" msprop:Generator_TablePropName="TableSchema" msprop:Generator_RowDeletingName="TableSchemaRowDeleting" msprop:Generator_RowChangingName="TableSchemaRowChanging" msprop:Generator_RowEvHandlerName="TableSchemaRowChangeEventHandler" msprop:Generator_RowDeletedName="TableSchemaRowDeleted" msprop:Generator_UserTableName="TableSchema" msprop:Generator_RowChangedName="TableSchemaRowChanged" msprop:Generator_RowEvArgName="TableSchemaRowChangeEvent" msprop:Generator_RowClassName="TableSchemaRow">
+        <xs:element name="TableSchema" msprop:Generator_TableClassName="TableSchemaDataTable" msprop:Generator_TableVarName="tableTableSchema" msprop:Generator_RowChangedName="TableSchemaRowChanged" msprop:Generator_TablePropName="TableSchema" msprop:Generator_RowDeletingName="TableSchemaRowDeleting" msprop:Generator_RowChangingName="TableSchemaRowChanging" msprop:Generator_RowEvHandlerName="TableSchemaRowChangeEventHandler" msprop:Generator_RowDeletedName="TableSchemaRowDeleted" msprop:Generator_RowClassName="TableSchemaRow" msprop:Generator_UserTableName="TableSchema" msprop:Generator_RowEvArgName="TableSchemaRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="ID" msprop:Generator_ColumnVarNameInTable="columnID" msprop:Generator_ColumnPropNameInRow="ID" msprop:Generator_ColumnPropNameInTable="IDColumn" msprop:Generator_UserColumnName="ID" type="xs:string" />
               <xs:element name="Name" msprop:Generator_ColumnVarNameInTable="columnName" msprop:Generator_ColumnPropNameInRow="Name" msprop:Generator_ColumnPropNameInTable="NameColumn" msprop:Generator_UserColumnName="Name" type="xs:string" minOccurs="0" />
               <xs:element name="Schema" msprop:Generator_ColumnVarNameInTable="columnSchema" msprop:Generator_ColumnPropNameInRow="Schema" msprop:Generator_ColumnPropNameInTable="SchemaColumn" msprop:Generator_UserColumnName="Schema" type="xs:string" minOccurs="0" />
               <xs:element name="DisplayName" msprop:Generator_ColumnVarNameInTable="columnDisplayName" msprop:Generator_ColumnPropNameInRow="DisplayName" msprop:Generator_ColumnPropNameInTable="DisplayNameColumn" msprop:Generator_UserColumnName="DisplayName" type="xs:string" minOccurs="0" />
+              <xs:element name="HasData" msprop:Generator_ColumnVarNameInTable="columnHasData" msprop:Generator_ColumnPropNameInRow="HasData" msprop:Generator_ColumnPropNameInTable="HasDataColumn" msprop:Generator_UserColumnName="HasData" type="xs:boolean" minOccurs="0" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>

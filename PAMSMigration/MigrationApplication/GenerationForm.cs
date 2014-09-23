@@ -98,7 +98,7 @@ namespace MigrationApplication
         private delegate void UpdateDataSourceDelegate(Table dataToMerge);
         private void UpdateGridDataSource(Table t)
         {
-            schemaDS.TableSchema.AddTableSchemaRow(t.Id, t.Name, t.Schema, t.Schema + "." + t.Name);
+            schemaDS.TableSchema.AddTableSchemaRow(t.Id, t.Name, t.Schema, t.Schema + "." + t.Name, t.HasData);
         }
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -119,44 +119,62 @@ namespace MigrationApplication
 
         private void backgroundWorker2_DoWork(object sender, DoWorkEventArgs e)
         {
-            projectNew.ServerName = @"RBM-Shotec";
-            projectNew.UserName = "sa";
-            projectNew.Password = "welcome";
-            projectNew.IsWindowsAuthentication = false;
-            projectNew.Name = "Migration Script";
-            projectNew.CreateDate = System.DateTime.Now;
-            DataType.LoadHashTables(Application.ExecutablePath.Substring(0, Application.ExecutablePath.LastIndexOf("\\")) + "\\" + "DataTypesMapper.xml");
-            projectNew.DatabaseType = DatabaseTypes.SQLServer;
-            projectNew.CheckHasData = true;
-            projectNew.Connect();
-            projectNew.ExtractorManager.DatabaseReaders.GetDatabases(projectNew);
-            Database database = projectNew.GetDatabaseByName("PAMSDB");
-            Database oldDatabase = projectNew.GetDatabaseByName("ShotecEgypt");
-            #region Extrating Table Information
-            if (database.Tables != null && database.Tables.Count == 0)
+            if (projectNew.Databases.Count == 0)
             {
-                projectNew.ExtractorManager.DatabaseReaders.GetTables(database);
-
-                foreach (Common.Entities.MetaDataSchema.Table tbl in database.Tables)
-                {
-                    projectNew.ExtractorManager.DatabaseReaders.GetColumns(tbl);
-                }
+                projectNew.ServerName = @"RBM-Shotec";
+                projectNew.UserName = "sa";
+                projectNew.Password = "welcome";
+                projectNew.IsWindowsAuthentication = false;
+                projectNew.Name = "Migration Script";
+                projectNew.CreateDate = System.DateTime.Now;
+                DataType.LoadHashTables(Application.ExecutablePath.Substring(0, Application.ExecutablePath.LastIndexOf("\\")) + "\\" + "DataTypesMapper.xml");
+                projectNew.DatabaseType = DatabaseTypes.SQLServer;
+                projectNew.CheckHasData = true;
+                projectNew.Connect();
+                projectNew.ExtractorManager.DatabaseReaders.GetDatabases(projectNew);
             }
-
-            if (oldDatabase.Tables != null && oldDatabase.Tables.Count == 0)
-            {
-                projectNew.ExtractorManager.DatabaseReaders.GetTables(oldDatabase);
-
-                foreach (Common.Entities.MetaDataSchema.Table tbl in oldDatabase.Tables)
+                Database database = projectNew.GetDatabaseByName("PAMSDB");
+                Database oldDatabase = projectNew.GetDatabaseByName("ShotecEgypt");
+                #region Extrating Table Information
+                if (database.Tables != null && database.Tables.Count == 0)
                 {
-                    projectNew.ExtractorManager.DatabaseReaders.GetColumns(tbl);
+                    projectNew.ExtractorManager.DatabaseReaders.GetTables(database);
+
+                    foreach (Common.Entities.MetaDataSchema.Table tbl in database.Tables)
+                    {
+                        projectNew.ExtractorManager.DatabaseReaders.GetTableRelations(tbl);
+                        projectNew.ExtractorManager.DatabaseReaders.GetColumns(tbl);
+
+                    }
+
                 }
-            }
-            #endregion
+
+                if (oldDatabase.Tables != null && oldDatabase.Tables.Count == 0)
+                {
+                    projectNew.ExtractorManager.DatabaseReaders.GetTables(oldDatabase);
+
+                    foreach (Common.Entities.MetaDataSchema.Table tbl in oldDatabase.Tables)
+                    {
+                        projectNew.ExtractorManager.DatabaseReaders.GetTableRelations(tbl);
+                        projectNew.ExtractorManager.DatabaseReaders.GetColumns(tbl);
+                        Table newTable = Table.GetByNameandSchema(database.Tables, tbl.Name, tbl.Schema);
+                        if (tbl.HasData)
+                            if (tbl.Name == "sysdiagrams")
+                                continue;
+                            else if (tbl.Name == "Roles" || tbl.Name == "BusinessEntity" || tbl.Name == "Credential" || tbl.Name == "Person" || tbl.Name == "UserRoles" || tbl.Name == "RolePrivileges")
+                                continue;
+                            else
+                                gridControl1.BeginInvoke(new UpdateDataSourceDelegate(UpdateGridDataSource), new object[] { tbl });
+                    }
+                }
+                #endregion
+            
+            
             strGen = new StringBuilder();
-
+            List<Table> tablesOrdered = new List<Table>();
+            OrderTablesBasedOnDependencies(oldDatabase, ref tablesOrdered);
             Generator g = new Generator(CodeType.Sql);
-            foreach (Table t in oldDatabase.Tables)
+            foreach (Table t in tablesOrdered)
             {
                 if (t.Name == "sysdiagrams")
                     continue;
@@ -196,7 +214,7 @@ namespace MigrationApplication
                             if (newC == null)
                                 continue;
                             columnsScript += c.Name + ",";
-                            oldColumnNames += c.Name + ",";
+                            oldColumnNames += GetColumnString(t, c) + ",";
                         }
                         
                     }
@@ -243,9 +261,131 @@ namespace MigrationApplication
                     strGen.AppendFormat(Environment.NewLine);
                     strGen.AppendFormat(Environment.NewLine);
 
-                    gridControl1.BeginInvoke(new UpdateDataSourceDelegate(UpdateGridDataSource), new object[] { t });
+                    
                 }
             }
+        }
+
+        private void OrderTablesBasedOnDependencies(Database db,ref List<Table> tables)
+        {
+            if (db.Tables.Count == tables.Count)
+                return;
+            
+            foreach(Table t in db.Tables)
+            {
+                Table check = Table.GetByNameandSchema(tables, t.Name, t.Schema);
+                if(check == null)
+                {
+                    if( t.ParentRelationShips.Count == 0)
+                    {
+                        tables.Add(t);
+                        
+                        
+                    }
+                }
+            }
+
+            foreach (Table t in db.Tables)
+            {
+                Table check = Table.GetByNameandSchema(tables, t.Name, t.Schema);
+                if (check == null)
+                {
+                    tables.Add(t);
+                }
+            }
+            db.Tables = tables;
+        }
+
+        private string GetColumnString(Table table, Column col)
+        {
+            string result = col.Name;
+            
+            foreach(RelationShip r in table.ParentRelationShips)
+            {
+                if(r.ChildColumn.Name == col.Name)
+                {
+                    switch(r.MasterTable.Name)
+                    {
+                        case "Address":
+                            result = string.Format("Migration.fn_GetNewAddressID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Banks":
+                            result = string.Format("Migration.fn_GetNewBankID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Categories":
+                            result = string.Format("Migration.fn_GetNewCategoryID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Cities":
+                            result = string.Format("Migration.fn_GetNewCityID({0}, 0, 0)", col.Name);
+                            break;
+                        case "ProjectsComments":
+                            result = string.Format("Migration.fn_GetNewCommentID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Currencies":
+                            result = string.Format("Migration.fn_GetNewCurrencyID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Customers":
+                            result = string.Format("Migration.fn_GetNewCustomerID({0}, 0, 0)", col.Name);
+                            break;
+                        case "CustomerSupplierRegistration":
+                            result = string.Format("Migration.fn_GetNewCustomerSupplierRegistrationID({0}, 0, 0)", col.Name);
+                            break;
+                        case "DocumentsJobs":
+                            result = string.Format("Migration.fn_GetNewDocID({0}, 0, 0)", col.Name);
+                            break;
+                        case "ProjectsGuarantee":
+                            result = string.Format("Migration.fn_GetNewGuranteeID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Inquiries":
+                            result = string.Format("Migration.fn_GetNewInquiryNumber({0}, 0, 0)", col.Name);
+                            break;
+                        case "Notifications":
+                            result = string.Format("Migration.fn_GetNewNotificationID({0}, 0, 0)", col.Name);
+                            break;
+                        case "SystemPages":
+                            result = string.Format("Migration.fn_GetNewPageID({0}, 0, 0)", col.Name);
+                            break;
+                        case "PartialOrder":
+                            result = string.Format("Migration.fn_GetNewPartialOrderID({0}, 0, 0)", col.Name);
+                            break;
+                        case "PartialShipment":
+                            result = string.Format("Migration.fn_GetNewPartialShipmentID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Person.Person":
+                        case "Person.BusinessEntity":
+                            result = string.Format("Migration.fn_GetNewPersonID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Products":
+                            result = string.Format("Migration.fn_GetNewProductID({0}, 0, 0)", col.Name);
+                            break;
+                        case "ProjectsHistory":
+                            result = string.Format("Migration.fn_GetNewProjectHistoryID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Projects":
+                            result = string.Format("Migration.fn_GetNewProjectID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Roles":
+                            result = string.Format("Migration.fn_GetNewRoleID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Suppliers":
+                            result = string.Format("Migration.fn_GetNewSupplierID({0}, 0, 0)", col.Name);
+                            break;
+                        case "TimeSheet":
+                            result = string.Format("Migration.fn_GetNewTimeSheetID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Transactions":
+                            result = string.Format("Migration.fn_GetNewTransactionID({0}, 0, 0)", col.Name);
+                            break;
+                        case "Visits":
+                            result = string.Format("Migration.fn_GetNewVisitID({0}, 0, 0)", col.Name);
+                            break;
+                        case "ProjectsLog":
+                            result = string.Format("Migration.fn_GetProjectLogID({0}, 0, 0)", col.Name);
+                            break;
+                    }
+                }
+            }
+            return result;
         }
 
         private void backgroundWorker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

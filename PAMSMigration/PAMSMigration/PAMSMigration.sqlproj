@@ -1376,11 +1376,15 @@
     <Build Include="Security\Person.sql" />
     <Build Include="Security\Serial.sql" />
     <Build Include="Migration\Functions\fn_GetCompanyCountryIDByName.sql" />
+    <Build Include="Migration\Functions\fn_GetNewLostReasonID.sql" />
+    <Build Include="Migration\Functions\fn_GetNewLostID.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="_DataMigration\MigrationScript_1_Old.sql" />
     <None Include="Snapshots\PAMSMigration_20140916_09-28-29.dacpac" />
     <None Include="_DataMigration\MigrationScript_0.sql" />
     <None Include="_DataMigration\MigrationScript_1.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="PAMSMigration.refactorlog" />
   </ItemGroup>
 </Project>

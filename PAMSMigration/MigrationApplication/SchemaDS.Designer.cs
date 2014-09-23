@@ -287,6 +287,8 @@ namespace MigrationApplication {
             
             private global::System.Data.DataColumn columnDisplayName;
             
+            private global::System.Data.DataColumn columnHasData;
+            
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public TableSchemaDataTable() {
@@ -354,6 +356,14 @@ namespace MigrationApplication {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public global::System.Data.DataColumn HasDataColumn {
+                get {
+                    return this.columnHasData;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             [global::System.ComponentModel.Browsable(false)]
             public int Count {
                 get {
@@ -389,13 +399,14 @@ namespace MigrationApplication {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public TableSchemaRow AddTableSchemaRow(string ID, string Name, string Schema, string DisplayName) {
+            public TableSchemaRow AddTableSchemaRow(string ID, string Name, string Schema, string DisplayName, bool HasData) {
                 TableSchemaRow rowTableSchemaRow = ((TableSchemaRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         ID,
                         Name,
                         Schema,
-                        DisplayName};
+                        DisplayName,
+                        HasData};
                 rowTableSchemaRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowTableSchemaRow);
                 return rowTableSchemaRow;
@@ -429,6 +440,7 @@ namespace MigrationApplication {
                 this.columnName = base.Columns["Name"];
                 this.columnSchema = base.Columns["Schema"];
                 this.columnDisplayName = base.Columns["DisplayName"];
+                this.columnHasData = base.Columns["HasData"];
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -442,6 +454,8 @@ namespace MigrationApplication {
                 base.Columns.Add(this.columnSchema);
                 this.columnDisplayName = new global::System.Data.DataColumn("DisplayName", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnDisplayName);
+                this.columnHasData = new global::System.Data.DataColumn("HasData", typeof(bool), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnHasData);
                 this.Constraints.Add(new global::System.Data.UniqueConstraint("Constraint1", new global::System.Data.DataColumn[] {
                                 this.columnID}, true));
                 this.columnID.AllowDBNull = false;
@@ -647,6 +661,22 @@ namespace MigrationApplication {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool HasData {
+                get {
+                    try {
+                        return ((bool)(this[this.tableTableSchema.HasDataColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'HasData\' in table \'TableSchema\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableTableSchema.HasDataColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public bool IsNameNull() {
                 return this.IsNull(this.tableTableSchema.NameColumn);
             }
@@ -679,6 +709,18 @@ namespace MigrationApplication {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public void SetDisplayNameNull() {
                 this[this.tableTableSchema.DisplayNameColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool IsHasDataNull() {
+                return this.IsNull(this.tableTableSchema.HasDataColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public void SetHasDataNull() {
+                this[this.tableTableSchema.HasDataColumn] = global::System.Convert.DBNull;
             }
         }
         

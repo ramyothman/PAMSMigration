@@ -11,20 +11,20 @@ BEGIN
 	set @NewSupplierID=null
 	if @EgyptID <>0
 	begin
-	select @NewSupplierID =  SupplierID from dbo.Suppliers
-	where EgyptID=@EgyptID
+	select @NewSupplierID =  BusinessEntityId from Person.BusinessEntity
+	where SupplierEgyptID=@EgyptID
 	end
 	else begin
 	if @RPEID <>0
 	begin
-	select @NewSupplierID =  SupplierID from dbo.Suppliers
-	where RPEID=@RPEID
+	select @NewSupplierID = BusinessEntityId  from Person.BusinessEntity
+	where SupplierRPEID=@RPEID
 	end
 	
 	else if @QatarID <>0
 	begin
-	select @NewSupplierID =  SupplierID from dbo.Suppliers
-	where QatarID=@QatarID
+	select @NewSupplierID = BusinessEntityId  from Person.BusinessEntity
+	where SupplierQatarID=@QatarID
 	end
 	end
 	return @NewSupplierID

@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[Suppliers] (
-    [SupplierID]         INT            IDENTITY (1, 1) NOT NULL,
+    [SupplierID]         INT NOT NULL,
     [SupplierName]       NVARCHAR (100) NOT NULL,
     [SupplierWebSite]    NVARCHAR (100) NULL,
     [ContactTitle]       NVARCHAR (10)  NULL,

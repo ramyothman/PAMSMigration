@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            this.btnGenerateFromOldDatabase = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
             this.richTextBox = new System.Windows.Forms.RichTextBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
@@ -43,8 +44,8 @@
             this.colDisplayName = new DevExpress.XtraGrid.Columns.GridColumn();
             this.schemaDSBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.splashScreenManager1 = new DevExpress.XtraSplashScreen.SplashScreenManager(this, typeof(global::MigrationApplication.WaitForm1), true, true);
-            this.btnGenerateFromOldDatabase = new DevExpress.XtraEditors.SimpleButton();
             this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
+            this.gridColumn1 = new DevExpress.XtraGrid.Columns.GridColumn();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
@@ -63,6 +64,15 @@
             this.panelControl1.Name = "panelControl1";
             this.panelControl1.Size = new System.Drawing.Size(872, 81);
             this.panelControl1.TabIndex = 0;
+            // 
+            // btnGenerateFromOldDatabase
+            // 
+            this.btnGenerateFromOldDatabase.Location = new System.Drawing.Point(315, 25);
+            this.btnGenerateFromOldDatabase.Name = "btnGenerateFromOldDatabase";
+            this.btnGenerateFromOldDatabase.Size = new System.Drawing.Size(174, 23);
+            this.btnGenerateFromOldDatabase.TabIndex = 1;
+            this.btnGenerateFromOldDatabase.Text = "Generate From Old";
+            this.btnGenerateFromOldDatabase.Click += new System.EventHandler(this.btnGenerateFromOldDatabase_Click);
             // 
             // simpleButton1
             // 
@@ -118,7 +128,8 @@
             this.colID,
             this.colName,
             this.colSchema,
-            this.colDisplayName});
+            this.colDisplayName,
+            this.gridColumn1});
             this.gridView1.GridControl = this.gridControl1;
             this.gridView1.Name = "gridView1";
             this.gridView1.OptionsSelection.MultiSelect = true;
@@ -147,25 +158,26 @@
             this.colDisplayName.Name = "colDisplayName";
             this.colDisplayName.Visible = true;
             this.colDisplayName.VisibleIndex = 1;
+            this.colDisplayName.Width = 130;
             // 
             // schemaDSBindingSource
             // 
             this.schemaDSBindingSource.DataSource = this.schemaDS;
             this.schemaDSBindingSource.Position = 0;
             // 
-            // btnGenerateFromOldDatabase
-            // 
-            this.btnGenerateFromOldDatabase.Location = new System.Drawing.Point(315, 25);
-            this.btnGenerateFromOldDatabase.Name = "btnGenerateFromOldDatabase";
-            this.btnGenerateFromOldDatabase.Size = new System.Drawing.Size(174, 23);
-            this.btnGenerateFromOldDatabase.TabIndex = 1;
-            this.btnGenerateFromOldDatabase.Text = "Generate From Old";
-            this.btnGenerateFromOldDatabase.Click += new System.EventHandler(this.btnGenerateFromOldDatabase_Click);
-            // 
             // backgroundWorker2
             // 
             this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
             this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
+            // 
+            // gridColumn1
+            // 
+            this.gridColumn1.Caption = "Has Data";
+            this.gridColumn1.FieldName = "HasData";
+            this.gridColumn1.Name = "gridColumn1";
+            this.gridColumn1.Visible = true;
+            this.gridColumn1.VisibleIndex = 2;
+            this.gridColumn1.Width = 71;
             // 
             // GenerationForm
             // 
@@ -204,7 +216,8 @@
         private DevExpress.XtraGrid.Columns.GridColumn colDisplayName;
         private System.Windows.Forms.BindingSource schemaDSBindingSource;
         private DevExpress.XtraEditors.SimpleButton btnGenerateFromOldDatabase;
-        private DevExpress.XtraSplashScreen.SplashScreenManager splashScreenManager1;
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
+        private DevExpress.XtraGrid.Columns.GridColumn gridColumn1;
+        private DevExpress.XtraSplashScreen.SplashScreenManager splashScreenManager1;
     }
 }

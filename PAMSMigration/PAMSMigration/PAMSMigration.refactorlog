@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="070efcf8-c635-4b57-ae70-e3ab3d31157a" ChangeDateTime="09/23/2014 17:59:52">
+    <Property Name="ElementName" Value="[dbo].[Losts].[LostID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Losts]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="RPEID" />
+  </Operation>
+</Operations>
