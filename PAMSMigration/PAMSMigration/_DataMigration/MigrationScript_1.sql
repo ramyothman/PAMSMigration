@@ -577,20 +577,12 @@ where Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0') IN (select Inqui
 
 SET IDENTITY_INSERT [dbo].[Losts] ON;
 
-insert into [dbo].[Losts] (LostID,InquiryNumber,Comment,UserName,ModifiedDate,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,IsSubLost,ParentInquiryNumber,LostComment,LostPrice,LostPriceRateToEuro,LostPriceRateDate,LostPriceInEuro,WinnerPriceCurrencyID,LostPriceCurrencyID,LostReasonID)
-select LostID,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),Comment,UserName,ModifiedDate,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,IsSubLost,ParentInquiryNumber,LostComment,LostPrice,LostPriceRateToEuro,LostPriceRateDate,LostPriceInEuro,Migration.fn_GetNewCurrencyID(WinnerPriceCurrencyID, 0, 0),Migration.fn_GetNewCurrencyID(LostPriceCurrencyID, 0, 0),(case when LostReasonID = 2 or LostReasonID = 6 then null else case when LostReasonID = 1 then 3 else [Migration].[fn_GetNewLostReasonID](LostReasonID,0,0) end end ) as LostReasonID from [ShotecEgypt].[dbo].[Losts] 
+insert into [dbo].[Losts] (LostID,InquiryNumber,Comment,UserName,ModifiedDate,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,IsSubLost,ParentInquiryNumber,LostComment,LostPrice,LostPriceRateToEuro,LostPriceRateDate,LostPriceInEuro,WinnerPriceCurrencyID,LostPriceCurrencyID,LostReasonID,EgyptID)
+select LostID,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),Comment,UserName,ModifiedDate,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,IsSubLost,ParentInquiryNumber,LostComment,LostPrice,LostPriceRateToEuro,LostPriceRateDate,LostPriceInEuro,Migration.fn_GetNewCurrencyID(WinnerPriceCurrencyID, 0, 0),Migration.fn_GetNewCurrencyID(LostPriceCurrencyID, 0, 0),(case when LostReasonID = 2 or LostReasonID = 6 then null else case when LostReasonID = 1 then 3 else [Migration].[fn_GetNewLostReasonID](LostReasonID,0,0) end end ) as LostReasonID,LostID from [ShotecEgypt].[dbo].[Losts] 
 
 SET IDENTITY_INSERT [dbo].[Losts] OFF;
 
 GO
-
--- Data Migration for Table dbo.Commissions --
-
-insert into [dbo].[Commissions] (CustomerPaymentID,InquiryNumber,PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,BankID,CurrencyID)
-select CustomerPaymentID,Migration.fn_GetNewInquiryNumber(InquiryNumber, 0, 0),PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,Migration.fn_GetNewBankID(BankID, 0, 0),Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0) from [ShotecEgypt].[dbo].[Commissions] 
-
-GO
-
 
 -- Data Migration for Table dbo.Transactions --
 insert into [dbo].[Transactions] (TransactionID,SupplierID,InquiryCode,Amount,TransactionDate,Reason,Reference,RateToEuro,AmountInEuro,CurrencyID,BankID,EgyptID)
@@ -639,6 +631,14 @@ SET IDENTITY_INSERT [dbo].[CustomerPayments] OFF;
 
 GO
 
+
+-- Data Migration for Table dbo.Commissions --
+
+insert into [dbo].[Commissions] (InquiryNumber,PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,BankID,CurrencyID)
+select Migration.fn_GetNewInquiryNumber(InquiryNumber, 0, 0),PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,Migration.fn_GetNewBankID(BankID, 0, 0),Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0) from [ShotecEgypt].[dbo].[Commissions] 
+
+GO
+
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 -- Partial Jobs       --
@@ -661,7 +661,7 @@ GO
 SET IDENTITY_INSERT [dbo].[PartialShipment] ON;
 
 insert into [dbo].[PartialShipment] (PartialShipmentID,ShipmentNumber,InvoiceNumber,InquiryNumber,ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,CurrencyID,ShotecNoTemp,EgyptID)
-select PartialShipmentID,ShipmentNumber,InvoiceNumber,Migration.fn_GetNewInquiryNumber(InquiryNumber, 0, 0),ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),ShotecNoTemp,PartialShipmentID from [ShotecEgypt].[dbo].[PartialShipment] 
+select PartialShipmentID,ShipmentNumber,InvoiceNumber,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),ShotecNoTemp,PartialShipmentID from [ShotecEgypt].[dbo].[PartialShipment] 
 
 SET IDENTITY_INSERT [dbo].[PartialShipment] OFF;
 
@@ -682,13 +682,6 @@ GO
 insert into [dbo].[PartialLost] (PartialOrderID,LostComment,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,Comment,UserName,ModifiedDate,WinnerPriceCurrencyID,LostReasonID)
 select Migration.fn_GetNewPartialOrderID(PartialOrderID, 0, 0),LostComment,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,Comment,UserName,ModifiedDate,Migration.fn_GetNewCurrencyID(WinnerPriceCurrencyID, 0, 0),(case when LostReasonID = 2 or LostReasonID = 6 then null else case when LostReasonID = 1 then 3 else [Migration].[fn_GetNewLostReasonID](LostReasonID,0,0) end end ) as LostReasonID  from [ShotecEgypt].[dbo].[PartialLost] 
 GO
-
-
--- Data Migration for Table dbo.PartialShipmentYearlyHistory --
-insert into [dbo].[PartialShipmentYearlyHistory] (PartialShipmentYearlyHistoryID,ShipmentNumber,InvoiceNumber,InquiryNumber,ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,CurrencyID,ShotecNoTemp)
-select PartialShipmentYearlyHistoryID,ShipmentNumber,InvoiceNumber,InquiryNumber,ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),ShotecNoTemp from [ShotecEgypt].[dbo].[PartialShipmentYearlyHistory] 
-GO
-
 
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -801,6 +794,11 @@ insert into [dbo].[DocumentsJobsVersionsYearlyHistory] (ID,DocID,FileName,Docume
 select ID,Migration.fn_GetNewDocID(DocID,0,0),[FileName],DocumentData,VersionNo,UserName,ModifiedDate from [ShotecEgypt].[dbo].[DocumentsJobsVersionsYearlyHistory] 
 GO
 
+
+-- Data Migration for Table dbo.PartialShipmentYearlyHistory --
+insert into [dbo].[PartialShipmentYearlyHistory] (PartialShipmentYearlyHistoryID,ShipmentNumber,InvoiceNumber,InquiryNumber,ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,CurrencyID,ShotecNoTemp)
+select PartialShipmentYearlyHistoryID,ShipmentNumber,InvoiceNumber,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),ShipmentDate,ItemDescription,Price,RateToEuro,RateDate,PriceInEuro,Remarks,UserName,ModifiedDate,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),ShotecNoTemp from [ShotecEgypt].[dbo].[PartialShipmentYearlyHistory] 
+GO
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 -- Notifications       --

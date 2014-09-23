@@ -1,4 +1,7 @@
-﻿CREATE FUNCTION [Migration].[fn_GetNewProductID]
+﻿--End Category
+--------------------------------------------------------------------------------
+--Functions
+CREATE FUNCTION [Migration].[fn_GetNewProductID]
 (
 	@EgyptID int ,
 	@RPEID int,

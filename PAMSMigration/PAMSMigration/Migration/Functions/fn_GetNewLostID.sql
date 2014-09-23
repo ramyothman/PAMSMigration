@@ -1,6 +1,4 @@
-﻿/****** Object:  UserDefinedFunction [Migration].[[fn_GetNewLostID]]    Script Date: 9/23/2014 7:55:58 PM ******/
-
---End Losts
+﻿--End Losts
 --------------------------------------------------------------------------------
 --Functions
 Create FUNCTION [Migration].[fn_GetNewLostID]

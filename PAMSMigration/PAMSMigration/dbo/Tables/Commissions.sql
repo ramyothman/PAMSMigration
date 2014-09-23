@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[Commissions] (
-    [CustomerPaymentID]             INT             NOT NULL,
+    [CustomerPaymentID]             INT             NOT NULL IDENTITY,
     [InquiryNumber]                 NVARCHAR (50)   NOT NULL,
     [PriceCommissionBase]           MONEY           NULL,
     [PercentPriceCommissionBase]    DECIMAL (18, 3) NULL,
@@ -22,7 +22,7 @@
     CONSTRAINT [PK_Commissions] PRIMARY KEY CLUSTERED ([CustomerPaymentID] ASC, [InquiryNumber] ASC),
     CONSTRAINT [FK_Commissions_Banks] FOREIGN KEY ([BankID]) REFERENCES [dbo].[Banks] ([ID]),
     CONSTRAINT [FK_Commissions_Currencies] FOREIGN KEY ([CurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
-    CONSTRAINT [FK_Commissions_CustomerPayments] FOREIGN KEY ([CustomerPaymentID]) REFERENCES [dbo].[CustomerPayments] ([CustomerPaymentID]) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT [FK_Commissions_CustomerPayments] FOREIGN KEY ([CustomerPaymentID]) REFERENCES [dbo].[CustomerPayments] ([CustomerPaymentID]),
     CONSTRAINT [FK_Commissions_Inquiries] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[Inquiries] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE
 );
 

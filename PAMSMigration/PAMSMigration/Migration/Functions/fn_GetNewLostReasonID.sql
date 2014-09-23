@@ -1,5 +1,6 @@
-﻿/****** Object:  UserDefinedFunction [Migration].[[fn_GetNewLostReasonID]]    Script Date: 9/23/2014 6:50:24 PM ******/
-
+﻿--End Lost Reasons
+--------------------------------------------------------------------------------
+--Functions
 Create FUNCTION [Migration].[fn_GetNewLostReasonID]
 (
 	@EgyptID int ,
