@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[Commissions] (
-    [CustomerPaymentID]             INT             NOT NULL IDENTITY,
+    [CustomerPaymentID]             INT             NOT NULL,
     [InquiryNumber]                 NVARCHAR (50)   NOT NULL,
     [PriceCommissionBase]           MONEY           NULL,
     [PercentPriceCommissionBase]    DECIMAL (18, 3) NULL,

@@ -634,8 +634,19 @@ GO
 
 -- Data Migration for Table dbo.Commissions --
 
-insert into [dbo].[Commissions] (InquiryNumber,PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,BankID,CurrencyID)
-select Migration.fn_GetNewInquiryNumber(InquiryNumber, 0, 0),PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,Migration.fn_GetNewBankID(BankID, 0, 0),Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0) from [ShotecEgypt].[dbo].[Commissions] 
+
+insert into [dbo].[CustomerPayments] (InquiryNumber,PaymentNumber,PaidAmount,ONDate,SumPaid,Deduction,DeductionNumber,DeductionAmount,Reason,SumDeduction,RestPayment,Comment,UserName,ModifiedDate,PaidAmountRateToEuro,PaidAmountInEuro,PaidAmountRateDate,DeductionAmountRateToEuro,DeductionAmountInEuro,DeductionAmountRateDate,PaidAmountCurrencyID,DeductionAmountCurrencyID,InvoiceNumber)
+select InquiryNumber,0,0,ONDate,0,0,0,0,'',0,CommissionAmountInEuro,'',UserName,ModifiedDate,RateToEuro,0,ONDate,0,0,OnDate,CurrencyID,CurrencyID,'' from 
+(select c.CustomerPaymentID,Migration.fn_GetNewInquiryNumber(com.InquiryNumber, 0, 0) as InquiryNumber,com.PriceCommissionBase,com.PercentPriceCommissionBase,com.CommissionPercent,com.CommissionAmount,com.RateToEuro,com.ONDate,com.CommissionAmountInEuro,com.Comment,com.Paid,com.UserName,com.ModifiedDate,com.MinPriceCommissionBase,com.MinPercentPriceCommissionBase,com.MinCommissionAmount,com.MinPercentCommissionAmount,Migration.fn_GetNewBankID(com.BankID, 0, 0) as BankID,Migration.fn_GetNewCurrencyID(com.CurrencyID, 0, 0) as CurrencyID from [ShotecEgypt].[dbo].[Commissions]  as com
+left join dbo.CustomerPayments as c on com.InquiryNumber COLLATE SQL_Latin1_General_CP1_CI_AS = c.InquiryNumber
+where c.CustomerPaymentID is null) as s
+
+
+
+insert into [dbo].[Commissions] (CustomerPaymentID,InquiryNumber,PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,BankID,CurrencyID)
+select c.CustomerPaymentID,Migration.fn_GetNewInquiryNumber(com.InquiryNumber, 0, 0),com.PriceCommissionBase,com.PercentPriceCommissionBase,com.CommissionPercent,com.CommissionAmount,com.RateToEuro,com.ONDate,com.CommissionAmountInEuro,com.Comment,com.Paid,com.UserName,com.ModifiedDate,com.MinPriceCommissionBase,com.MinPercentPriceCommissionBase,com.MinCommissionAmount,com.MinPercentCommissionAmount,Migration.fn_GetNewBankID(com.BankID, 0, 0),Migration.fn_GetNewCurrencyID(com.CurrencyID, 0, 0) from [ShotecEgypt].[dbo].[Commissions]  as com
+left join dbo.CustomerPayments as c on com.InquiryNumber = Migration.fn_GetNewInquiryNumber(c.InquiryNumber, 0, 0)
+
 
 GO
 
