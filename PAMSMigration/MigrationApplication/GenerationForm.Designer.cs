@@ -30,33 +30,38 @@
         {
             this.components = new System.ComponentModel.Container();
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            this.simpleButton2 = new DevExpress.XtraEditors.SimpleButton();
             this.btnGenerateFromOldDatabase = new DevExpress.XtraEditors.SimpleButton();
             this.simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
             this.richTextBox = new System.Windows.Forms.RichTextBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.tableSchemaBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.schemaDS = new MigrationApplication.SchemaDS();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.colID = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colName = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colSchema = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colDisplayName = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.schemaDSBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.splashScreenManager1 = new DevExpress.XtraSplashScreen.SplashScreenManager(this, typeof(global::MigrationApplication.WaitForm1), true, true);
-            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.gridColumn1 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.schemaDSBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorker3 = new System.ComponentModel.BackgroundWorker();
+            this.splashScreenManager2 = new DevExpress.XtraSplashScreen.SplashScreenManager(this, typeof(global::MigrationApplication.WaitForm1), true, true);
+            this.schemaDS1 = new MigrationApplication.SchemaDS();
+            this.tableSchemaBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tableSchemaBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.schemaDS)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.schemaDSBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.schemaDS1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tableSchemaBindingSource1)).BeginInit();
             this.SuspendLayout();
             // 
             // panelControl1
             // 
+            this.panelControl1.Controls.Add(this.simpleButton2);
             this.panelControl1.Controls.Add(this.btnGenerateFromOldDatabase);
             this.panelControl1.Controls.Add(this.simpleButton1);
             this.panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -64,6 +69,15 @@
             this.panelControl1.Name = "panelControl1";
             this.panelControl1.Size = new System.Drawing.Size(872, 81);
             this.panelControl1.TabIndex = 0;
+            // 
+            // simpleButton2
+            // 
+            this.simpleButton2.Location = new System.Drawing.Point(520, 25);
+            this.simpleButton2.Name = "simpleButton2";
+            this.simpleButton2.Size = new System.Drawing.Size(174, 23);
+            this.simpleButton2.TabIndex = 2;
+            this.simpleButton2.Text = "Check Branch ID";
+            this.simpleButton2.Click += new System.EventHandler(this.simpleButton2_Click);
             // 
             // btnGenerateFromOldDatabase
             // 
@@ -102,7 +116,8 @@
             // gridControl1
             // 
             this.gridControl1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.gridControl1.DataSource = this.tableSchemaBindingSource;
+            this.gridControl1.DataMember = "TableSchema";
+            this.gridControl1.DataSource = this.schemaDS1;
             this.gridControl1.Dock = System.Windows.Forms.DockStyle.Right;
             this.gridControl1.Location = new System.Drawing.Point(578, 81);
             this.gridControl1.MainView = this.gridView1;
@@ -115,12 +130,6 @@
             // tableSchemaBindingSource
             // 
             this.tableSchemaBindingSource.DataMember = "TableSchema";
-            this.tableSchemaBindingSource.DataSource = this.schemaDS;
-            // 
-            // schemaDS
-            // 
-            this.schemaDS.DataSetName = "SchemaDS";
-            this.schemaDS.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
             // 
             // gridView1
             // 
@@ -160,16 +169,6 @@
             this.colDisplayName.VisibleIndex = 1;
             this.colDisplayName.Width = 130;
             // 
-            // schemaDSBindingSource
-            // 
-            this.schemaDSBindingSource.DataSource = this.schemaDS;
-            this.schemaDSBindingSource.Position = 0;
-            // 
-            // backgroundWorker2
-            // 
-            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
-            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
-            // 
             // gridColumn1
             // 
             this.gridColumn1.Caption = "Has Data";
@@ -178,6 +177,26 @@
             this.gridColumn1.Visible = true;
             this.gridColumn1.VisibleIndex = 2;
             this.gridColumn1.Width = 71;
+            // 
+            // backgroundWorker2
+            // 
+            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
+            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
+            // 
+            // backgroundWorker3
+            // 
+            this.backgroundWorker3.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker3_DoWork);
+            this.backgroundWorker3.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker3_RunWorkerCompleted);
+            // 
+            // schemaDS1
+            // 
+            this.schemaDS1.DataSetName = "SchemaDS";
+            this.schemaDS1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            // 
+            // tableSchemaBindingSource1
+            // 
+            this.tableSchemaBindingSource1.DataMember = "TableSchema";
+            this.tableSchemaBindingSource1.DataSource = this.schemaDS1;
             // 
             // GenerationForm
             // 
@@ -193,9 +212,10 @@
             this.panelControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tableSchemaBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.schemaDS)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.schemaDSBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.schemaDS1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tableSchemaBindingSource1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -219,5 +239,10 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn1;
         private DevExpress.XtraSplashScreen.SplashScreenManager splashScreenManager1;
+        private DevExpress.XtraEditors.SimpleButton simpleButton2;
+        private System.ComponentModel.BackgroundWorker backgroundWorker3;
+        private SchemaDS schemaDS1;
+        private System.Windows.Forms.BindingSource tableSchemaBindingSource1;
+        private DevExpress.XtraSplashScreen.SplashScreenManager splashScreenManager2;
     }
 }

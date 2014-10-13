@@ -16,40 +16,32 @@ CREATE PROCEDURE [dbo].[GetPrincipleProjectsAnalysisGraphs]
 @BranchID int
 AS
 BEGIN
+
 declare @sql nvarchar(max)
 declare  @d datetime 
 declare @FromDate as datetime
 declare @ToDate as datetime
+
 if(@Current = 'false')
 set @PeriodNumber = @PeriodNumber - 1
+
 set @FromDate = @ChoosenFromDate
 set @ToDate = @ChoosenToDate
-create table #tempViewSubProjectTotals
-(CustomerID int null, SupplierID int null, OfferStatus nvarchar(50) null,CompanyName nvarchar(100) null,
-CompanyCode nvarchar(15) null, SupplierName nvarchar(100) null, OrderDate datetime null, DeliveredON datetime null,
-Delivered bit null, InquiryDate datetime null, PriceInEuro money null, QuotationPriceInEuro money null,
-LostDate datetime null, OrderStatusID int null, OrderStatus nvarchar(50) null, OfferDate datetime null, 
-LostReasonID int null, ReasonName nvarchar(50) null, LostReasonCode nvarchar(50) null, InquiryNumber nvarchar(50) null,
-InquiryTypeID int null, InquiryStatusID int null, InquiryStatusName nvarchar(50) null, IsSubOrder bit null, 
-ProductTypeID int null, IsSubOffer bit null ,  ShipmentDate datetime null, ShipmentPriceInEuro decimal(18,4) null,
-BackLog decimal(18,4) null, IsPrincipale bit null, HasSubSuppliers bit null, ProjectTypeID int null,
-InquiryType nvarchar(50) null, InquiryStatus nvarchar(50) null, CompletedGoodsPaidON datetime null,
-IsCompletedGoodsPaid bit null, BranchID int null, SupplierBranchID int null, IsGeneral bit null, 
-CompletedOn datetime null, PaidAmountInEuro decimal(18,2) null, row bigint null)
-insert into #tempViewSubProjectTotals select * from viewSubProjectTotals
---print('ggg')
---print (@ToDate)
---if(@ToDate < (SELECT DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,@ToDate)+1,0))))
-    set @ToDate =  dateadd(dd,1,@ToDate)
-    Select @ToDate = Convert(DateTime, Convert(VarChar, @ToDate , 101))
+
+ set @ToDate =  dateadd(dd,1,@ToDate)
+Select @ToDate = Convert(DateTime, Convert(VarChar, @ToDate , 101))
+
   DECLARE @week int
+
 	   declare @TempToDate datetime 
 	   declare @TempFromDate DATETIME 
+
 create table #tempTable 
 (InquiryStatus nvarchar(50), TotalAmount decimal(18,4),StatusCount int,
  SelecetdDate nvarchar(100),ProductTypeID int)
  
 create table #AllDatesRange (DateRange nvarchar(100))
+
 if(@SupplierID >0)
 BEGIN
 	-- User Choose Month
@@ -78,12 +70,14 @@ BEGIN
 		END
 		
 		set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 insert into #AllDatesRange 
 					values (Convert(nvarchar(5),Month(@d),100) + '-' + Convert(nvarchar(5),Year(@d),100))
 			 set @d = DATEADD(month,1,@d)
 		END
+
 	   if(@InquiryStatus = 'Inquiry')	
 	   insert into #tempTable
 			 Select InquiryStatus,
@@ -91,11 +85,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS Year,Month(InquiryDate) AS Month,
 							 ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and
@@ -112,11 +106,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year,Month(OfferDate) AS Month,
 							 ISNull(ProductTypeID,0)  ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
@@ -133,19 +127,18 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year,Month(OrderDate) AS Month,
 							 ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and (OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))))  and 
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+						  OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and   InquiryStatus in( 'Order','Delivered') and row = 1 
+						  SupplierID = @SupplierID
 				   Group by YEAR(OrderDate),Month(OrderDate),ProductTypeID
 				  ) as tbl 
 			 where InquiryStatus = @InquiryStatus    
-			
 			 Group by ProductTypeID,InquiryStatus,Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100)
 			 order by InquiryStatus    
 	   else if(@InquiryStatus = 'Delivered' )
@@ -156,19 +149,18 @@ BEGIN
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from ( SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year,Month(DeliveredON) AS Month
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year,Month(ShipmentDate) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null
-					 and 
-						  DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
-						  (IsPrincipale = 'True' or HasSubSuppliers ='True')  and  row = 1 and 
-						  SupplierID = @SupplierID AND InquiryStatus = 'Delivered' 
-				   Group by YEAR(DeliveredON),Month(DeliveredON), ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						  ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+						  ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))and 
+						  (IsPrincipale = 'True' or HasSubSuppliers ='True')  and 
+						  SupplierID = @SupplierID --AND InquiryStatus = 'Delivered' 
+				   Group by YEAR(ShipmentDate),Month(ShipmentDate), ProductTypeID
 				  ) as tbl 
-			 where InquiryStatus = @InquiryStatus    
+			-- where InquiryStatus = @InquiryStatus    
 			 Group by InquiryStatus,ProductTypeID,Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100)
 			 order by InquiryStatus
 		 else if(@InquiryStatus = 'GoodsPaid' )
@@ -178,11 +170,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year,Month(CompletedGoodsPaidON) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						  CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))and 
@@ -200,11 +192,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year,Month(CompletedOn) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						  CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -222,15 +214,15 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year,Month(LostDate) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True')  and 
-						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled')
+						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse')
 				   Group by YEAR(LostDate),Month(LostDate),InquiryStatus,ProductTypeID
 				  ) as tbl 
 			 where InquiryStatus = @InquiryStatus    
@@ -258,6 +250,7 @@ BEGIN
 			
 			set @FromDate = [dbo].[GetFirstDayOfQuarter](@FromDate)	
 			
+			print('hhhh')
 			print(@FromDate)
 			print(@ToDate)
 			
@@ -265,12 +258,14 @@ BEGIN
 			SELECT @FromDate = (CAST(STR(MONTH(@FromDate))+'/'+STR(01)+'/'+STR(YEAR(@FromDate)) AS DateTime))
 		END
 		set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 insert into #AllDatesRange 
 					values ('Q.' + Convert(nvarchar(5),datepart(qq,@d),100) + ' - ' + Convert(nvarchar(5),Year(@d),100))
 			 set @d = DATEADD(month,3,@d)
 		END
+
 		if(@InquiryStatus = 'Inquiry')	
 		insert into #tempTable
 			Select InquiryStatus,
@@ -279,11 +274,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS Year, datepart(qq,InquiryDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True')  and 
@@ -301,11 +296,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate
 			 ,ISNull(ProductTypeID,0) ProductTypeID 
 			 from (    
-				  SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year, datepart(qq,OfferDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
@@ -323,15 +318,15 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year, datepart(qq,OrderDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and   InquiryStatus in( 'Order','Delivered') and row = 1 
+						  SupplierID = @SupplierID
 				   Group by YEAR(OrderDate),datepart(qq,OrderDate),ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus 
@@ -346,17 +341,17 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year, datepart(qq,DeliveredON) AS Quarter
+				  SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year, datepart(qq,ShipmentDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						  DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						 ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+							ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and InquiryStatus = 'Delivered'
-				   Group by YEAR(DeliveredON),datepart(qq,DeliveredON),ProductTypeID
+						  SupplierID = @SupplierID --and InquiryStatus = 'Delivered'
+				   Group by YEAR(ShipmentDate),datepart(qq,ShipmentDate),ProductTypeID
 				  ) as tbl
 			-- where InquiryStatus = @InquiryStatus 
 			 Group by InquiryStatus,ProductTypeID,'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100)
@@ -369,11 +364,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year, datepart(qq,CompletedGoodsPaidON) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						 CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -392,11 +387,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year, datepart(qq,CompletedOn) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						 CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -415,21 +410,22 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year, datepart(qq,LostDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled')
+						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse')
 				   Group by YEAR(LostDate),datepart(qq,LostDate),InquiryStatus,ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus 
 			 Group by InquiryStatus,ProductTypeID,'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100)
 			 order by InquiryStatus   
 	END
+
 	-- User Choose Year
 	else if(@PeriodChoice = 2)
 	Begin
@@ -451,6 +447,7 @@ BEGIN
 			SELECT @FromDate = (CAST(STR(MONTH(@FromDate))+'/'+STR(01)+'/'+STR(YEAR(@FromDate)) AS DateTime))
 	   END 
 	   set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 insert into #AllDatesRange 
@@ -465,11 +462,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS Year
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-						FROM         #tempViewSubProjectTotals
+						FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
@@ -486,10 +483,10 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						 OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
@@ -505,14 +502,14 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
-						  (IsPrincipale = 'True' or HasSubSuppliers ='True')  and 
-						  SupplierID = @SupplierID and   InquiryStatus in( 'Order','Delivered') and row = 1 
+						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
+						  SupplierID = @SupplierID
 				   Group by YEAR(OrderDate),ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus  
@@ -524,18 +521,18 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						    DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
+			 from (     SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						  ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+							ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID  and InquiryStatus = @InquiryStatus 
-				   Group by YEAR(DeliveredON),ProductTypeID
+						  SupplierID = @SupplierID
+				   Group by YEAR(ShipmentDate),ProductTypeID
 				  ) as tbl
-			 --where InquiryStatus = @InquiryStatus  
+			-- where InquiryStatus = @InquiryStatus  
 			 Group by InquiryStatus,ProductTypeID,[Year]
 			 order by InquiryStatus 
 	 else if(@InquiryStatus = 'GoodsPaid')	
@@ -544,10 +541,10 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						  CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -564,10 +561,10 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						  CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -584,20 +581,22 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled')
+						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse')
 				   Group by YEAR(LostDate),InquiryStatus,ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus  
 			 Group by InquiryStatus, ProductTypeID,[Year]
 			 order by InquiryStatus 
 	END
+
+
 	-- User Choose Week
 	else if(@PeriodChoice = 3)
 	Begin
@@ -619,6 +618,7 @@ BEGIN
 		--	SELECT @FromDate = (CAST(STR(MONTH(@FromDate))+'/'+STR(01)+'/'+STR(YEAR(@FromDate)) AS DateTime))
 	 --  END 
 	  set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 SELECT @week = DATEPART(wk,@d)
@@ -639,11 +639,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' + 
 			 Convert(nvarchar(5),[Year],100) as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS YEAR,
 							 DATEPART(wk,InquiryDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-						FROM         #tempViewSubProjectTotals
+						FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
@@ -660,11 +660,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year,
 							 DATEPART(wk,OfferDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
@@ -681,15 +681,15 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year,
 							 DATEPART(wk,OrderDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
-						  (IsPrincipale = 'True' or HasSubSuppliers ='True')  and 
-						  SupplierID = @SupplierID and   InquiryStatus in( 'Order','Delivered') and row = 1 
+						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
+						  SupplierID = @SupplierID
 				   Group by  DATEPART(wk,OrderDate),YEAR(OrderDate), ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus  
@@ -702,19 +702,19 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year,
-							 DATEPART(wk,DeliveredON) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						   DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
+			 from (     SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year,
+							 DATEPART(wk,ShipmentDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						  ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+							ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and InquiryStatus = @InquiryStatus 
-				   Group by DATEPART(wk,DeliveredON),YEAR(DeliveredON),ProductTypeID
+						  SupplierID = @SupplierID
+				   Group by DATEPART(wk,ShipmentDate),YEAR(ShipmentDate),ProductTypeID
 				  ) as tbl
-			-- where InquiryStatus = @InquiryStatus  
+			 where InquiryStatus = @InquiryStatus  
 			 Group by InquiryStatus,ProductTypeID,'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100) 
 			 order by InquiryStatus 
 	 else if(@InquiryStatus = 'GoodsPaid')	
@@ -724,11 +724,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year,
 							 DATEPART(wk,CompletedGoodsPaidON) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						  CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -746,11 +746,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year,
 							 DATEPART(wk,CompletedOn) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						  CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -768,15 +768,15 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year,
 							 DATEPART(wk,LostDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' or HasSubSuppliers ='True') and 
-						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled')
+						  SupplierID = @SupplierID and InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse')
 				   Group by DATEPART(wk,LostDate),YEAR(LostDate),InquiryStatus, ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus  
@@ -814,12 +814,14 @@ BEGIN
 		END
 		
 		set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 insert into #AllDatesRange 
 					values (Convert(nvarchar(5),Month(@d),100) + '-' + Convert(nvarchar(5),Year(@d),100))
 			 set @d = DATEADD(month,1,@d)
 		END
+
 	   if(@InquiryStatus = 'Inquiry')	
 	   insert into #tempTable
 			 Select InquiryStatus,
@@ -827,11 +829,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS Year,Month(InquiryDate) AS Month,
 							 ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -847,11 +849,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year,Month(OfferDate) AS Month,
 							 ISNull(ProductTypeID,0)  ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -867,17 +869,14 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year,Month(OrderDate) AS Month,
 							 ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  
-						  --and lostdate is null
-						   and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and   InquiryStatus in( 'Order','Delivered') and row = 1 
-						  
+						  OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by YEAR(OrderDate),Month(OrderDate),ProductTypeID
 				  ) as tbl 
 			 where InquiryStatus = @InquiryStatus    
@@ -890,16 +889,16 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year,Month(DeliveredON) AS Month
+			 from ( SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year,Month(ShipmentDate) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						   DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and InquiryStatus = @InquiryStatus 
-				   Group by YEAR(DeliveredON),Month(DeliveredON), ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						  ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+						  ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
+				   Group by YEAR(ShipmentDate),Month(ShipmentDate), ProductTypeID
 				  ) as tbl 
 			-- where InquiryStatus = @InquiryStatus    
 			 Group by InquiryStatus,ProductTypeID,Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100)
@@ -911,11 +910,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year,Month(CompletedGoodsPaidON) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						  CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -932,11 +931,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year,Month(CompletedOn) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						  CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -953,14 +952,14 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 Convert(nvarchar(5),[Month],100) + '-' + Convert(nvarchar(5),[Year],100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from ( SELECT  InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from ( SELECT  InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year,Month(LostDate) AS Month
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
-						  InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled') and 
+						  InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse') and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by YEAR(LostDate),Month(LostDate),InquiryStatus,ProductTypeID
 				  ) as tbl 
@@ -994,12 +993,14 @@ BEGIN
 			SELECT @FromDate = (CAST(STR(MONTH(@FromDate))+'/'+STR(01)+'/'+STR(YEAR(@FromDate)) AS DateTime))
 		END
 		set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 insert into #AllDatesRange 
 					values ('Q.' + Convert(nvarchar(5),datepart(qq,@d),100) + ' - ' + Convert(nvarchar(5),Year(@d),100))
 			 set @d = DATEADD(month,3,@d)
 		END
+
 		if(@InquiryStatus = 'Inquiry')	
 		insert into #tempTable
 			Select InquiryStatus,
@@ -1008,11 +1009,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS Year, datepart(qq,InquiryDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -1029,11 +1030,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate
 			 ,ISNull(ProductTypeID,0) ProductTypeID 
 			 from (    
-				  SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year, datepart(qq,OfferDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -1050,16 +1051,15 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year, datepart(qq,OrderDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and   InquiryStatus in( 'Order','Delivered') and row = 1 
-						  
-				   Group by YEAR(OrderDate),datepart(qq,OrderDate),ProductTypeID 
+							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
+				   Group by YEAR(OrderDate),datepart(qq,OrderDate),ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus 
 			 Group by InquiryStatus, ProductTypeID,'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100)
@@ -1073,16 +1073,16 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year, datepart(qq,DeliveredON) AS Quarter
+				  SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year, datepart(qq,ShipmentDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						   DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and InquiryStatus = @InquiryStatus 
-				   Group by YEAR(DeliveredON),datepart(qq,DeliveredON),ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						 ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+							ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
+				   Group by YEAR(ShipmentDate),datepart(qq,ShipmentDate),ProductTypeID
 				  ) as tbl
 			-- where InquiryStatus = @InquiryStatus 
 			 Group by InquiryStatus,ProductTypeID,'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100)
@@ -1095,11 +1095,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year, datepart(qq,CompletedGoodsPaidON) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						 CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -1117,11 +1117,11 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year, datepart(qq,CompletedOn) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						 CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -1139,14 +1139,14 @@ BEGIN
 			 'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100) as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
 			 from (    
-				  SELECT InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+				  SELECT InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year, datepart(qq,LostDate) AS Quarter
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
-						   InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled') and 
+						   InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse') and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by YEAR(LostDate),datepart(qq,LostDate),InquiryStatus,ProductTypeID
 				  ) as tbl
@@ -1154,6 +1154,7 @@ BEGIN
 			 Group by InquiryStatus,ProductTypeID,'Q.' + Convert(nvarchar(5),[Quarter],100) + ' - ' + Convert(nvarchar(5),Year,100)
 			 order by InquiryStatus   
 	END
+
 	-- User Choose Year
 	else if(@PeriodChoice = 2)
 	Begin
@@ -1175,6 +1176,7 @@ BEGIN
 			SELECT @FromDate = (CAST(STR(MONTH(@FromDate))+'/'+STR(01)+'/'+STR(YEAR(@FromDate)) AS DateTime))
 	   END 
 	   set @d= @FromDate 
+
 		while @d < @ToDate 
 		Begin 
 			 insert into #AllDatesRange 
@@ -1189,11 +1191,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS Year
 							 ,ISNull(ProductTypeID,0) ProductTypeID
-						FROM         #tempViewSubProjectTotals
+						FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) 
 				   Group by YEAR(InquiryDate),ProductTypeID
@@ -1208,10 +1210,10 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						 OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -1226,14 +1228,13 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))   and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and   InquiryStatus in( 'Order','Delivered') and row = 1 
-						  and supplierID =@SupplierID
+							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by YEAR(OrderDate),ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus  
@@ -1245,15 +1246,15 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						  DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and InquiryStatus = @InquiryStatus 
-				   Group by YEAR(DeliveredON),ProductTypeID
+			 from (     SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						  ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+							ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True') 
+				   Group by YEAR(ShipmentDate),ProductTypeID
 				  ) as tbl
 			-- where InquiryStatus = @InquiryStatus  
 			 Group by InquiryStatus,ProductTypeID,[Year]
@@ -1264,10 +1265,10 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						  CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -1283,10 +1284,10 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						  CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -1302,13 +1303,13 @@ BEGIN
 			 ISNull(SUM(TotalAmount),0) as TotalAmount,
 			 SUM(StatusCount) as StatusCount,
 			 [Year] as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year,ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and  LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
-						  InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled') and 
+						  InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse') and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by YEAR(LostDate),InquiryStatus,ProductTypeID
 				  ) as tbl
@@ -1316,6 +1317,8 @@ BEGIN
 			 Group by InquiryStatus, ProductTypeID,[Year]
 			 order by InquiryStatus 
 	END
+
+
 	-- User Choose Week
 	else if(@PeriodChoice = 3)
 	Begin
@@ -1358,11 +1361,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' + 
 			 Convert(nvarchar(5),[Year],100) as SelecetdDate ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Inquiry' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Inquiry' as InquiryStatus,Count('Inquiry') as StatusCount,
 							 0 as TotalAmount, 
 							 YEAR(InquiryDate) AS YEAR,
 							 DATEPART(wk,InquiryDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-						FROM         #tempViewSubProjectTotals
+						FROM  viewSubProjectTotals
 					where BranchID = @BranchID and InquiryDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 						  InquiryDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -1378,11 +1381,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Offer' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Offer' as InquiryStatus,Count('Offer') as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(OfferDate) AS Year,
 							 DATEPART(wk,OfferDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OfferDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							OfferDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
@@ -1398,15 +1401,14 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Order' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 							 YEAR(OrderDate) AS Year,
 							 DATEPART(wk,OrderDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and OrderDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))   and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and   InquiryStatus in( 'Order','Delivered') and row = 1 
-						 
+							OrderDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by  DATEPART(wk,OrderDate),YEAR(OrderDate), ProductTypeID
 				  ) as tbl
 			 where InquiryStatus = @InquiryStatus  
@@ -1419,18 +1421,18 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Delivered' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
-							 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
-							 YEAR(DeliveredON) AS Year,
-							 DATEPART(wk,DeliveredON) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
-					where BranchID = @BranchID and DeliveredON is not null and 
-						  DeliveredON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
-						  DeliveredON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and row = 1 and 
-						  (IsPrincipale = 'True' OR HasSubSuppliers='True') and InquiryStatus = @InquiryStatus  
-				   Group by DATEPART(wk,DeliveredON),YEAR(DeliveredON),ProductTypeID
+			 from (     SELECT  'Delivered' as InquiryStatus,Count('Delivered') as StatusCount,
+							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
+							 YEAR(ShipmentDate) AS Year,
+							 DATEPART(wk,ShipmentDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
+					FROM  viewSubProjectTotals
+					where BranchID = @BranchID and ShipmentDate is not null and 
+						  ShipmentDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+							ShipmentDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
+						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
+				   Group by DATEPART(wk,ShipmentDate),YEAR(ShipmentDate),ProductTypeID
 				  ) as tbl
-			  
+			 where InquiryStatus = @InquiryStatus  
 			 Group by InquiryStatus,ProductTypeID,'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100) 
 			 order by InquiryStatus
 	 else if(@InquiryStatus = 'GoodsPaid')	
@@ -1440,11 +1442,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'GoodsPaid' as InquiryStatus,Count('GoodsPaid') as StatusCount,
 							 ISNull(Sum(PaidAmountInEuro),0) as TotalAmount, 
 							 YEAR(CompletedGoodsPaidON) AS Year,
 							 DATEPART(wk,CompletedGoodsPaidON) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedGoodsPaidON is not null and 
 						  CompletedGoodsPaidON >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedGoodsPaidON <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
@@ -1461,11 +1463,11 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  'Completed' as InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  'Completed' as InquiryStatus,Count('Completed') as StatusCount,
 							 ISNull(Sum(ShipmentPriceInEuro),0) as TotalAmount, 
 							 YEAR(CompletedOn) AS Year,
 							 DATEPART(wk,CompletedOn) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and CompletedOn is not null and 
 						  CompletedOn >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							CompletedOn <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate)))  and 
@@ -1482,14 +1484,14 @@ BEGIN
 			 SUM(StatusCount) as StatusCount,
 			 'CW.' +Convert(nvarchar(5), [Week],100) + ' - ' +Convert(nvarchar(5),[Year],100)  as SelecetdDate 
 			 ,ISNull(ProductTypeID,0) ProductTypeID
-			 from (     SELECT  InquiryStatus,Count(distinct InquiryNumber) as StatusCount,
+			 from (     SELECT  InquiryStatus,Count(InquiryStatus) as StatusCount,
 							 ISNull(Sum(QuotationPriceInEuro),0) as TotalAmount, 
 							 YEAR(LostDate) AS Year,
 							 DATEPART(wk,LostDate) AS [Week],ISNull(ProductTypeID,0) ProductTypeID
-					FROM         #tempViewSubProjectTotals
+					FROM  viewSubProjectTotals
 					where BranchID = @BranchID and LostDate >= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 							LostDate <= (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) and 
-						  InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse','Canceled') and 
+						  InquiryStatus IN ('Lost','Regret','Cancelled','LateResponse') and 
 						  (IsPrincipale = 'True' OR HasSubSuppliers='True')
 				   Group by DATEPART(wk,LostDate),YEAR(LostDate),InquiryStatus, ProductTypeID
 				  ) as tbl
@@ -1498,6 +1500,7 @@ BEGIN
 			 order by InquiryStatus 
 	END
 END
+
 	select ISNull(InquiryStatus,@InquiryStatus) InquiryStatus, IsNull(TotalAmount,0) TotalAmount,
 	IsNull(StatusCount,0) StatusCount , #AllDatesRange.DateRange as SelecetdDate ,IsNull(ProductTypeID,0) ProductTypeID from 
 	#tempTable Right Outer join #AllDatesRange
@@ -1505,6 +1508,7 @@ END
 	 
    
 	--DROP TABLE [dbo].[#tempTable]	
+
 	--DROP TABLE [dbo].[#AllDatesRange]
 	
     print(@FromDate)

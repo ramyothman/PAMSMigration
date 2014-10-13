@@ -1,6 +1,6 @@
 ﻿CREATE VIEW dbo.View_RemainingCommissionAmount
 AS
-SELECT     CustomerID, CompanyName AS CustomerName, SupplierID, SupplierName, Delivered, SUM(CASE WHEN Paid = 1 THEN 0 ELSE RemainingCommissionAmount END) AS PriceInEuro, 
+SELECT     CustomerID, CompanyName AS CustomerName, SupplierID, SupplierName, Delivered, SUM(CommissionAmount - dbo.GetSumJobCommissionTransactions(InquiryNumber)) AS PriceInEuro, 
                       YEAR(ExpansionDeliveryDate) AS Year, BranchID, BranchNameFL, CountryID, CountryName, CompanyCode
 FROM         dbo.ViewCommissions
 GROUP BY CustomerID, CompanyName, SupplierID, SupplierName, YEAR(ExpansionDeliveryDate), Delivered, BranchID, BranchNameFL, CountryID, CountryName, CompanyCode
@@ -129,6 +129,8 @@ Begin DesignProperties =
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'View_RemainingCommissionAmount';
+
+
 
 
 GO

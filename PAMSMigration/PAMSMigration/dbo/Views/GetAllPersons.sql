@@ -18,15 +18,15 @@ SELECT     Person.Person.NameStyle, Person.Person.EmailPromotion, Person.Person.
                       dbo.GetAllPersonExtra.SalaryCurrencyName, Person.Person.BusinessEntityId, dbo.GetAllPersonExtra.NumOfVacation, Person.Person.IsActive, dbo.GetAllPersonExtra.EmployeeTypeID, 
                       dbo.GetAllPersonExtra.EmployeeTypeName, dbo.GetAllPersonsAddresses.CityID, PB.BranchID, dbo.GetAllPersonExtra.BranchNameFL, dbo.GetAllPersonExtra.CountryID, 
                       dbo.GetAllPersonExtra.CountryName, Person.PersonLanguages.AcronymName
-FROM         dbo.GetAllPersonExtra INNER JOIN
+FROM         dbo.PersonsBranches AS PB INNER JOIN
                       Person.Person INNER JOIN
                       Person.PersonType ON Person.Person.BusinessEntityId = Person.PersonType.BusinessEntityId INNER JOIN
                       Person.PersonPersonTypes ON Person.PersonType.PersonPersonTypesId = Person.PersonPersonTypes.PersonPersonTypesId INNER JOIN
-                      Person.PersonLanguages ON Person.Person.BusinessEntityId = Person.PersonLanguages.PersonId ON dbo.GetAllPersonExtra.PersonID = Person.Person.BusinessEntityId LEFT OUTER JOIN
+                      Person.PersonLanguages ON Person.Person.BusinessEntityId = Person.PersonLanguages.PersonId ON PB.PersonID = Person.Person.BusinessEntityId INNER JOIN
+                      dbo.GetAllPersonExtra ON Person.Person.BusinessEntityId = dbo.GetAllPersonExtra.PersonID LEFT OUTER JOIN
                       dbo.GetAllPersonsPhones ON Person.Person.BusinessEntityId = dbo.GetAllPersonsPhones.BusinessEntityId LEFT OUTER JOIN
                       dbo.GetAllPersonsAddresses ON Person.Person.BusinessEntityId = dbo.GetAllPersonsAddresses.BusinessEntityId LEFT OUTER JOIN
-                      dbo.GetAllPersonsMails ON Person.Person.BusinessEntityId = dbo.GetAllPersonsMails.BusinessEntityId INNER JOIN
-                      dbo.PersonsBranches AS PB ON PB.PersonID = Person.Person.BusinessEntityId
+                      dbo.GetAllPersonsMails ON Person.Person.BusinessEntityId = dbo.GetAllPersonsMails.BusinessEntityId
 
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane1', @value = N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
@@ -34,7 +34,7 @@ Begin DesignProperties =
    Begin PaneConfigurations = 
       Begin PaneConfiguration = 0
          NumPanes = 4
-         Configuration = "(H (1[47] 4[45] 2[5] 3) )"
+         Configuration = "(H (1[48] 4[27] 2[9] 3) )"
       End
       Begin PaneConfiguration = 1
          NumPanes = 3
@@ -97,15 +97,25 @@ Begin DesignProperties =
    Begin DiagramPane = 
       Begin Origin = 
          Top = 0
-         Left = 0
+         Left = -50
       End
       Begin Tables = 
-         Begin Table = "Person (Person)"
+         Begin Table = "GetAllPersonExtra"
             Begin Extent = 
                Top = 0
-               Left = 781
-               Bottom = 270
-               Right = 1026
+               Left = 25
+               Bottom = 159
+               Right = 244
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "Person (Person)"
+            Begin Extent = 
+               Top = 7
+               Left = 438
+               Bottom = 277
+               Right = 683
             End
             DisplayFlags = 280
             TopColumn = 0
@@ -142,10 +152,10 @@ Begin DesignProperties =
          End
          Begin Table = "GetAllPersonsPhones"
             Begin Extent = 
-               Top = 40
-               Left = 1065
-               Bottom = 160
-               Right = 1272
+               Top = 30
+               Left = 1218
+               Bottom = 150
+               Right = 1425
             End
             DisplayFlags = 280
             TopColumn = 2
@@ -154,7 +164,13 @@ Begin DesignProperties =
             Begin Extent = 
                Top = 94
                Left = 254
-               Bottom = 214
+         ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'GetAllPersons';
+
+
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'      Bottom = 214
                Right = 461
             End
             DisplayFlags = 280
@@ -164,11 +180,7 @@ Begin DesignProperties =
             Begin Extent = 
                Top = 486
                Left = 38
-      ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'GetAllPersons';
-
-
-GO
-EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'         Bottom = 606
+               Bottom = 606
                Right = 241
             End
             DisplayFlags = 280
@@ -176,20 +188,10 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'         B
          End
          Begin Table = "PB"
             Begin Extent = 
-               Top = 62
-               Left = 906
-               Bottom = 307
-               Right = 1066
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
-         Begin Table = "GetAllPersonExtra"
-            Begin Extent = 
                Top = 0
-               Left = 25
-               Bottom = 159
-               Right = 244
+               Left = 816
+               Bottom = 245
+               Right = 976
             End
             DisplayFlags = 280
             TopColumn = 0
@@ -201,8 +203,9 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'         B
    Begin DataPane = 
       Begin ParameterDefaults = ""
       End
-      Begin ColumnWidths = 9
+      Begin ColumnWidths = 10
          Width = 284
+         Width = 1500
          Width = 1500
          Width = 1500
          Width = 1500
@@ -232,6 +235,8 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'         B
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'GetAllPersons';
+
+
 
 
 GO

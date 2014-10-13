@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{30a0af9b-ebf9-4b7c-b3b6-8c30eade91cf}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql110DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -1378,6 +1378,15 @@
     <Build Include="Migration\Functions\fn_GetCompanyCountryIDByName.sql" />
     <Build Include="Migration\Functions\fn_GetNewLostReasonID.sql" />
     <Build Include="Migration\Functions\fn_GetNewLostID.sql" />
+    <Build Include="dbo\Views\ViewCommissionPaymentSummaryDetail.sql" />
+    <Build Include="dbo\Views\ViewCommissionPaymentSummary.sql" />
+    <Build Include="dbo\Functions\fn_GetRemainingCommission.sql" />
+    <Build Include="dbo\Functions\fn_GetPaidCommission.sql" />
+    <Build Include="dbo\Functions\fn_GetCommissionBranchID.sql" />
+    <Build Include="dbo\Functions\fn_GetCommissionAmount.sql" />
+    <Build Include="dbo\Stored Procedures\KillConnectionsHost.sql" />
+    <Build Include="dbo\Views\ViewMiniCommissions.sql" />
+    <Build Include="dbo\Functions\fn_GetCommissionDue.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Snapshots\PAMSMigration_20140916_09-28-29.dacpac" />

@@ -28,6 +28,9 @@
     [CurrencyID]                INT             NULL,
     CONSTRAINT [PK_CustomerPayments] PRIMARY KEY CLUSTERED ([CustomerPaymentID] ASC),
     CONSTRAINT [FK_CustomerPayments_Currencies] FOREIGN KEY ([DeductionAmountCurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
-    CONSTRAINT [FK_CustomerPayments_Currencies1] FOREIGN KEY ([PaidAmountCurrencyID]) REFERENCES [dbo].[Currencies] ([ID])
+    CONSTRAINT [FK_CustomerPayments_Currencies1] FOREIGN KEY ([PaidAmountCurrencyID]) REFERENCES [dbo].[Currencies] ([ID]),
+    CONSTRAINT [FK_CustomerPayments_Inquiries] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[Inquiries] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
 

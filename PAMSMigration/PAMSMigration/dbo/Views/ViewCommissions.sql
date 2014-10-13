@@ -1,23 +1,21 @@
 ﻿CREATE VIEW dbo.ViewCommissions
 AS
-SELECT     dbo.Commissions.InquiryNumber, dbo.Commissions.PriceCommissionBase, dbo.Commissions.PercentPriceCommissionBase, dbo.Commissions.CommissionPercent, 
-                      dbo.Commissions.CommissionAmount, dbo.Commissions.CurrencyID, dbo.Commissions.RateToEuro, dbo.Commissions.ONDate, dbo.Commissions.BankID, 
-                      dbo.Commissions.CommissionAmountInEuro, dbo.Commissions.Comment, dbo.Commissions.Paid, dbo.Commissions.UserName, dbo.Commissions.ModifiedDate, dbo.Banks.BankName, 
-                      dbo.fn_GetBankAccountNumber(dbo.Banks.ID) AS BankAccountNumber, dbo.Inquiries.ShotecNo, dbo.Commissions.MinPriceCommissionBase, dbo.Commissions.MinPercentPriceCommissionBase, 
-                      dbo.Commissions.MinCommissionAmount, dbo.Commissions.MinPercentCommissionAmount, dbo.Inquiries.SupplierID, dbo.Suppliers.SupplierName, dbo.Inquiries.CustomerID, 
-                      dbo.Customers.CompanyName, dbo.Orders.CustomerOrderNumber, dbo.Orders.SupplierOrderNumber, dbo.Orders.OrderDate, dbo.Orders.Delivered, dbo.Orders.DeliveredON, 
-                      dbo.Orders.PriceInEuro, dbo.Orders.Price AS OrderPrice, dbo.Orders.CurrencyID AS OrderCurrency, dbo.Orders.RateToEuro AS OrderRateToEuro, dbo.Orders.ONDate AS OrderOnDate, 
-                      dbo.view_SubViewCommissionAmounts.PaidCommissionAmount, dbo.Orders.ExpansionDeliveryDate, dbo.Inquiries.BranchID, dbo.CompanyBranches.BranchNameFL, 
+SELECT     dbo.Orders.InquiryNumber, dbo.Orders.PriceCommissionBase, dbo.Orders.PercentPriceCommissionBase, dbo.Orders.CommissionPercent, dbo.Orders.CommissionAmount, 
+                      dbo.Orders.CommissionRateDate AS ONDate, dbo.Orders.CommissionAmountInEuro, CAST(0 AS bit) AS Paid, dbo.Orders.UserName, dbo.Orders.ModifiedDate, dbo.Banks.BankName, 
+                      dbo.fn_GetBankAccountNumber(dbo.Banks.ID) AS BankAccountNumber, dbo.Inquiries.ShotecNo, 0 AS MinPriceCommissionBase, 0 AS MinPercentPriceCommissionBase, 
+                      0 AS MinCommissionAmount, 0 AS MinPercentCommissionAmount, dbo.Inquiries.SupplierID, dbo.Suppliers.SupplierName, dbo.Inquiries.CustomerID, dbo.Customers.CompanyName, 
+                      dbo.Orders.CustomerOrderNumber, dbo.Orders.SupplierOrderNumber, dbo.Orders.OrderDate, dbo.Orders.Delivered, dbo.Orders.DeliveredON, dbo.Orders.PriceInEuro, 
+                      dbo.Orders.Price AS OrderPrice, dbo.Orders.CurrencyID AS OrderCurrency, dbo.Orders.RateToEuro AS OrderRateToEuro, dbo.Orders.ONDate AS OrderOnDate, 
+                      ISNULL(dbo.fn_GetPaidCommission(dbo.Orders.InquiryNumber), 0) AS PaidCommissionAmount, dbo.Orders.ExpansionDeliveryDate, dbo.Inquiries.BranchID, dbo.CompanyBranches.BranchNameFL, 
                       dbo.CompanyBranches.BranchNameSL, dbo.CompanyBranches.CountryID, dbo.CompanyCountries.CountryName, dbo.Customers.CompanyCode, 
-                      dbo.view_SubViewCommissionAmounts.RemainCommission AS RemainingCommissionAmount
-FROM         dbo.Commissions INNER JOIN
-                      dbo.Currencies ON dbo.Commissions.CurrencyID = dbo.Currencies.ID INNER JOIN
-                      dbo.Inquiries ON dbo.Commissions.InquiryNumber = dbo.Inquiries.InquiryNumber INNER JOIN
+                      dbo.Orders.CommissionAmountInEuro - ISNULL(dbo.GetSumJobCommissionTransactions(dbo.Orders.InquiryNumber), 0) AS RemainingCommissionAmount, 
+                      dbo.Orders.CommissionCurrencyID AS CurrencyID, dbo.Orders.CommissionRateToEuro AS RateToEuro
+FROM         dbo.Inquiries INNER JOIN
                       dbo.Customers ON dbo.Inquiries.CustomerID = dbo.Customers.CustomerID INNER JOIN
                       dbo.Suppliers ON dbo.Inquiries.SupplierID = dbo.Suppliers.SupplierID INNER JOIN
-                      dbo.Orders ON dbo.Commissions.InquiryNumber = dbo.Orders.InquiryNumber LEFT OUTER JOIN
-                      dbo.Banks ON dbo.Commissions.BankID = dbo.Banks.ID LEFT OUTER JOIN
-                      dbo.view_SubViewCommissionAmounts ON dbo.Commissions.InquiryNumber = dbo.view_SubViewCommissionAmounts.InquiryNumber LEFT OUTER JOIN
+                      dbo.Orders ON dbo.Inquiries.InquiryNumber = dbo.Orders.InquiryNumber INNER JOIN
+                      dbo.Currencies ON dbo.Orders.CommissionCurrencyID = dbo.Currencies.ID LEFT OUTER JOIN
+                      dbo.Banks ON dbo.Currencies.ID = dbo.Banks.CurrencyID LEFT OUTER JOIN
                       dbo.CompanyBranches ON dbo.Inquiries.BranchID = dbo.CompanyBranches.ID LEFT OUTER JOIN
                       dbo.CompanyCountries ON dbo.CompanyBranches.CountryID = dbo.CompanyCountries.ID AND dbo.CompanyBranches.CountryID = dbo.CompanyCountries.ID AND 
                       dbo.CompanyBranches.CountryID = dbo.CompanyCountries.ID AND dbo.CompanyBranches.CountryID = dbo.CompanyCountries.ID AND dbo.CompanyBranches.CountryID = dbo.CompanyCountries.ID
@@ -28,7 +26,7 @@ Begin DesignProperties =
    Begin PaneConfigurations = 
       Begin PaneConfiguration = 0
          NumPanes = 4
-         Configuration = "(H (1[39] 4[12] 2[29] 3) )"
+         Configuration = "(H (1[33] 4[4] 2[41] 3) )"
       End
       Begin PaneConfiguration = 1
          NumPanes = 3
@@ -90,39 +88,19 @@ Begin DesignProperties =
    End
    Begin DiagramPane = 
       Begin Origin = 
-         Top = -220
+         Top = 0
          Left = 0
       End
       Begin Tables = 
-         Begin Table = "Commissions"
-            Begin Extent = 
-               Top = 0
-               Left = 266
-               Bottom = 120
-               Right = 509
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
-         Begin Table = "Currencies"
-            Begin Extent = 
-               Top = 131
-               Left = 495
-               Bottom = 251
-               Right = 666
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
          Begin Table = "Inquiries"
             Begin Extent = 
-               Top = 335
-               Left = 623
-               Bottom = 455
-               Right = 835
+               Top = 164
+               Left = 538
+               Bottom = 284
+               Right = 750
             End
             DisplayFlags = 280
-            TopColumn = 0
+            TopColumn = 1
          End
          Begin Table = "Customers"
             Begin Extent = 
@@ -136,64 +114,66 @@ Begin DesignProperties =
          End
          Begin Table = "Suppliers"
             Begin Extent = 
-               Top = 105
-               Left = 752
-               Bottom = 225
-               Right = 940
+               Top = 44
+               Left = 787
+               Bottom = 164
+               Right = 975
             End
             DisplayFlags = 280
-            TopColumn = 0
+            TopColumn = 9
          End
          Begin Table = "Orders"
             Begin Extent = 
-               Top = 366
-               Left = 38
-               Bottom = 486
-               Right = 265
+               Top = 20
+               Left = 29
+               Bottom = 263
+               Right = 256
+            End
+            DisplayFlags = 280
+            TopColumn = 27
+         End
+         Begin Table = "Currencies"
+            Begin Extent = 
+               Top = 0
+               Left = 460
+               Bottom = 172
+               Right = 631
             End
             DisplayFlags = 280
             TopColumn = 0
          End
          Begin Table = "Banks"
             Begin Extent = 
-               Top = 366
-               Left = 303
-               Bottom = 486
-               Right = 463
+               Top = 201
+               Left = 350
+               Bottom = 321
+               Right = 510
             End
-            D', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewCommissions';
-
-
-GO
-EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'isplayFlags = 280
-            TopColumn = 0
+            DisplayFlags = 280
+            TopColumn = 2
          End
          Begin Table = "CompanyBranches"
             Begin Extent = 
-               Top = 606
-               Left = 38
-               Bottom = 726
-               Right = 276
+               Top = 457
+               Left = 626
+               Bottom = 577
+               Right = 864
             End
-            DisplayFlags = 280
+            Di', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewCommissions';
+
+
+
+
+GO
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'splayFlags = 280
             TopColumn = 0
          End
          Begin Table = "CompanyCountries"
             Begin Extent = 
-               Top = 486
-               Left = 306
-               Bottom = 606
-               Right = 466
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
-         Begin Table = "view_SubViewCommissionAmounts"
-            Begin Extent = 
-               Top = 238
-               Left = 375
-               Bottom = 462
-               Right = 756
+               Top = 560
+               Left = 682
+               Bottom = 680
+               Right = 842
             End
             DisplayFlags = 280
             TopColumn = 0
@@ -209,13 +189,13 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'isplayFlag
          Width = 284
          Width = 1500
          Width = 3360
-         Width = 1500
+         Width = 2955
          Width = 1500
          Width = 2205
          Width = 1500
          Width = 1500
-         Width = 1500
-         Width = 1500
+         Width = 2250
+         Width = 2205
          Width = 1500
          Width = 1500
          Width = 1500
@@ -255,9 +235,9 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'isplayFlag
    End
    Begin CriteriaPane = 
       Begin ColumnWidths = 11
-         Column = 1440
-         Alias = 1650
-         Table = 1170
+         Column = 6255
+         Alias = 2445
+         Table = 3135
          Output = 720
          Append = 1400
          NewValue = 1170
@@ -272,6 +252,8 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'isplayFlag
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewCommissions';
+
+
 
 
 GO

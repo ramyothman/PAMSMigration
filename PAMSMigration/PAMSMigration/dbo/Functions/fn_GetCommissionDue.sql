@@ -3,9 +3,9 @@
 -- Create date: <Create Date, ,>
 -- Description:	<Description, ,>
 -- =============================================
-CREATE FUNCTION [dbo].[GetSupplierCommissionDue]
+Create FUNCTION [dbo].[fn_GetCommissionDue]
 (
-	@SupplierID int,
+	@InquiryNumber varchar(50),
 	@BranchID int
 )
 RETURNS decimal(18,2)
@@ -19,7 +19,7 @@ SELECT  @DueCommission =  sum((dbo.GetSumJobCustomerPayment(Orders.InquiryNumber
 FROM         Orders INNER JOIN
                       (select distinct InquiryNumber,Paid, CommissionPercent from dbo.Commissions) as c on c.InquiryNumber = Orders.InquiryNumber INNER JOIN
                       Inquiries ON Orders.InquiryNumber = Inquiries.InquiryNumber
-WHERE     (Inquiries.SupplierID = @SupplierID) AND (c.Paid = 'False') and Inquiries.BranchID = @BranchID
+WHERE     (Inquiries.InquiryNumber = @InquiryNumber) AND (c.Paid = 'False') and Inquiries.BranchID = @BranchID
 	
 	return ISNULL(@DueCommission,0)
 END

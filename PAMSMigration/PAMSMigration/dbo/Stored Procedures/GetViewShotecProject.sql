@@ -74,8 +74,8 @@ dbo.Commissions.CommissionAmountInEuro, dbo.Banks.BankName, dbo.Commissions.Paid
 dbo.Commissions.MinPercentPriceCommissionBase, dbo.Commissions.MinCommissionAmount, dbo.Commissions.MinPercentCommissionAmount
 , CAST((CASE WHEN Commissions.InquiryNumber IS NULL THEN 0 ELSE 1 END) AS Bit) AS HasCommission
 ,dbo.Currencies.CurrencyCode AS CommissionCurrency, dbo.Commissions.BankID
-,CAST(ISNULL(dbo.view_SubViewCommissionAmounts.PaidCommissionAmount, 0) AS decimal(18, 2)) AS PaidCommissionAmount
-,CAST(ISNULL(dbo.view_SubViewCommissionAmounts.RemainingCommissionAmount, 0) AS decimal(18, 2)) AS RemainingCommissionAmount 
+,dbo.fn_GetPaidCommission(dbo.Inquiries.InquiryNumber) AS PaidCommissionAmount
+,dbo.fn_GetRemainingCommission(dbo.Inquiries.InquiryNumber) AS RemainingCommissionAmount 
 ,dbo.ViewPaymentTotals.Paid 
                          * ISNULL(dbo.Orders.PercentPriceCommissionBase, 0) * ISNULL(dbo.Commissions.CommissionPercent, 0) 
                          - isnull(dbo.ViewPaidCommissionsTotals.PaidCommissionInEuro,0) AS DueCommission 
@@ -128,7 +128,6 @@ Left Join dbo.CompletedProjects ON dbo.Inquiries.InquiryNumber = dbo.CompletedPr
 	Set @CommTables = 'Left Join dbo.Commissions ON dbo.Inquiries.InquiryNumber = dbo.Commissions.InquiryNumber
 Left Join dbo.Currencies as CommissionCurrencies on dbo.Commissions.CurrencyID = CommissionCurrencies.ID
 Left Join dbo.Banks on dbo.Commissions.BankID = dbo.Banks.ID
-Left Join dbo.view_SubViewCommissionAmounts ON dbo.Commissions.InquiryNumber = dbo.view_SubViewCommissionAmounts.InquiryNumber
 Left Join dbo.ViewPaidCommissionsTotals ON dbo.Commissions.InquiryNumber = dbo.ViewPaidCommissionsTotals.InquiryNumber  
 '
 if(CHARINDEX('ProjectSerialNumber',@WhereQuery) > 0)

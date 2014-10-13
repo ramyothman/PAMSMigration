@@ -115,8 +115,8 @@ Begin
          from ( SELECT  'Order' as InquiryStatus,Count('Order') as StatusCount,
 						 ISNull(Sum(PriceInEuro),0) as TotalAmount, 
 						 YEAR(OrderDate) AS Year,Month(OrderDate) AS Month
-				FROM         #tempViewSubProjectTotals
-				where InquiryStatus = @InquiryStatus    and (SupplierBranchID = @BranchID OR IsGeneral = 'True') and BranchID = @BranchID and (IsPrincipale = 'True' or HasSubSuppliers ='True') and IsSubOffer = 'False' and OrderDate between (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
+				FROM         viewSubProjectTotals
+				where  (SupplierBranchID = @BranchID OR IsGeneral = 'True') and BranchID = @BranchID and (IsPrincipale = 'True' or HasSubSuppliers ='True') and IsSubOffer = 'False' and OrderDate between (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 										   (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) 
 					 AND IsSubOrder ='false'  and row = 1 
 			   Group by YEAR(OrderDate),Month(OrderDate)
@@ -366,7 +366,7 @@ insert into #tempTable
 				FROM         #tempViewSubProjectTotals
 				where (SupplierBranchID = @BranchID OR IsGeneral = 'True') and BranchID = @BranchID and (IsPrincipale = 'True' or HasSubSuppliers ='True') and IsSubOffer = 'False' and OrderDate between (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0, @FromDate))) and 
 										   (SELECT DATEADD(dd, 0, DATEDIFF(dd, 0,@ToDate))) 
-					 and row = 1 
+				 and row = 1 
 			   Group by YEAR(OrderDate)
 	          ) as tbl
          where InquiryStatus = @InquiryStatus  

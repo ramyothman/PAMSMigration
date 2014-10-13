@@ -32,9 +32,17 @@
     [QatarID]                    NVARCHAR (50)   NULL,
     [DeliveryTimePeriodID]       INT             NULL,
     [DiscountValue]              DECIMAL (18, 4) NULL,
+    [CommissionPercent]          DECIMAL (18, 3) NULL,
+    [CommissionCurrencyID]       INT             NULL,
+    [CommissionRateToEuro]       DECIMAL (18, 3) NULL,
+    [CommissionRateDate]         DATETIME        NULL,
+    [CommissionAmount]           MONEY           NULL,
+    [CommissionAmountInEuro]     MONEY           NULL,
     CONSTRAINT [PK_Orders] PRIMARY KEY CLUSTERED ([InquiryNumber] ASC),
     CONSTRAINT [FK_Orders_Inquiries] FOREIGN KEY ([InquiryNumber]) REFERENCES [dbo].[Inquiries] ([InquiryNumber]) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT [FK_Orders_PaymentTypes] FOREIGN KEY ([PaymentTypeID]) REFERENCES [dbo].[PaymentTypes] ([ID]),
     CONSTRAINT [FK_Orders_PriceBase] FOREIGN KEY ([PriceBaseID]) REFERENCES [dbo].[PriceBase] ([ID])
 );
+
+
 

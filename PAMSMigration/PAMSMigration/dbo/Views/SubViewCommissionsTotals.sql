@@ -1,10 +1,10 @@
 ﻿/****** Object:  View [dbo].[SubViewCommissionsTotals]    Script Date: 03/20/2013 12:03:15 ******/
 CREATE VIEW dbo.SubViewCommissionsTotals
 AS
-SELECT     InquiryNumber, SUM(CommissionAmount) AS CommissionAmount, SUM(PaidCommissionAmount) AS PaidCommissionAmount, CommissionPaymentDate, BranchID, BranchNameFL, BranchNameSL, 
-                      CountryID, CountryName, RemainCommission AS RemainingCommissionAmount
+SELECT     InquiryNumber, SUM(CommissionAmount) AS CommissionAmount, SUM(PaidCommissionAmount) AS PaidCommissionAmount, 
+                      CommissionAmount - PaidCommissionAmount AS RemainingCommissionAmount, CommissionPaymentDate, BranchID, BranchNameFL, BranchNameSL, CountryID, CountryName
 FROM         dbo.ViewSubCommissionPayments
-GROUP BY InquiryNumber, CommissionAmount, PaidCommissionAmount, CommissionPaymentDate, BranchID, BranchNameFL, BranchNameSL, CountryID, CountryName, RemainCommission
+GROUP BY InquiryNumber, CommissionAmount, PaidCommissionAmount, CommissionPaymentDate, BranchID, BranchNameFL, BranchNameSL, CountryID, CountryName
 
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane1', @value = N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
@@ -128,6 +128,8 @@ Begin DesignProperties =
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'SubViewCommissionsTotals';
+
+
 
 
 GO

@@ -363,7 +363,7 @@ GO
 SET IDENTITY_INSERT [dbo].[OffersTemplates] ON
 
 insert into [dbo].[OffersTemplates] (ID,InquiryNumber,HeaderName,ClientContactPerson,ClientAddress,ClientCity,ClientPhone,ClientFax,HeaderDate,ValidUntil,HeaderText,HeaderTemplate,DeliveryTime,PaymentTerms,DeliveryTerms,Taxes,OfferValidity,EndTemplate,TotalItemsValue,ItemsCurrencyID,ItemsComments,ItemsNotes,RevisionNumber,IsFirstLanguage,UserName,ModifiedDate,ClientContactPersonTitle,OfferValidityPeriod,PreparedByEmpID,ApprovedByEmpID,BranchID,OfferValidityText)
-select ID,InquiryNumber,HeaderName,ClientContactPerson,ClientAddress,ClientCity,ClientPhone,ClientFax,HeaderDate,ValidUntil,HeaderText,HeaderTemplate,DeliveryTime,PaymentTerms,DeliveryTerms,Taxes,OfferValidity,EndTemplate,TotalItemsValue,ItemsCurrencyID,ItemsComments,ItemsNotes,RevisionNumber,IsFirstLanguage,UserName,ModifiedDate,ClientContactPersonTitle,OfferValidityPeriod,PreparedByEmpID,ApprovedByEmpID,BranchID,OfferValidityText from [PAMSDB].[dbo].[OffersTemplates] 
+select ID,InquiryNumber,HeaderName,ClientContactPerson,ClientAddress,ClientCity,ClientPhone,ClientFax,HeaderDate,ValidUntil,HeaderText,HeaderTemplate,DeliveryTime,PaymentTerms,DeliveryTerms,Taxes,OfferValidity,EndTemplate,TotalItemsValue,ItemsCurrencyID,ItemsComments,ItemsNotes,RevisionNumber,IsFirstLanguage,UserName,ModifiedDate,ClientContactPersonTitle,OfferValidityPeriod,PreparedByEmpID,ApprovedByEmpID,1,OfferValidityText from [PAMSDB].[dbo].[OffersTemplates] 
 
 SET IDENTITY_INSERT [dbo].[OffersTemplates] OFF
 
@@ -605,7 +605,7 @@ GO
 SET IDENTITY_INSERT [Serial].[SerialStatus] ON
 
 insert into [Serial].[SerialStatus] (SerialStatusID,BranchID,SerialTypeID,IsActive,SerialDate,UserName)
-select SerialStatusID,BranchID,SerialTypeID,IsActive,SerialDate,UserName from [PAMSDB].[Serial].[SerialStatus] 
+select SerialStatusID,1,SerialTypeID,IsActive,SerialDate,UserName from [PAMSDB].[Serial].[SerialStatus] 
 
 SET IDENTITY_INSERT [Serial].[SerialStatus] OFF
 

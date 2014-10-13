@@ -29,10 +29,11 @@ BEGIN
 	    
 	    	select @TotalDaysCasual = Sum(NumOfDays) from [dbo].[EmployeeVacations] 
 	where ( (Year(StartDate) between   @Year - 2 and @Year - 1  )  or ( Year(EndDate) between   @Year - 2 and @Year - 1  )) and PersonID = @EmployeeID
-	    and ( VacationTypeID = 1 )
+	    and ( VacationTypeID in ( 1,9 ) )
 	--set @RemainDays = case when @TotalDays is null then 0 else   (ISNull(@TotalNumOfDays,0))  - ISNull(@TotalDays,0)end 
 	
-	set @RemainDays = case when  (@TotalNumOfDaysDueCasual - @TotalDaysCasual) > 0 then 0 else (@TotalNumOfDaysDueCasual - @TotalDaysCasual) end   + (@TotalNumOfDaysDueAnnual    - @TotalDaysAnnual )
+	set @RemainDays = case when  case when  (@TotalNumOfDaysDueCasual - @TotalDaysCasual) > 0 then 0 else (@TotalNumOfDaysDueCasual - @TotalDaysCasual) end   + (@TotalNumOfDaysDueAnnual    - @TotalDaysAnnual ) < 0 then 0 
+	else case when  (@TotalNumOfDaysDueCasual - @TotalDaysCasual) > 0 then 0 else (@TotalNumOfDaysDueCasual - @TotalDaysCasual) end   + (@TotalNumOfDaysDueAnnual    - @TotalDaysAnnual ) end
 	
 	
 	return @RemainDays

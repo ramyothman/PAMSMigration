@@ -223,7 +223,7 @@ namespace Common.Entities.MetaDataSchema
         {
             foreach (Column col in columns)
             {
-                if (col.Name == searchName)
+                if (col.Name.ToLower() == searchName.ToLower())
                     return col;
             }
             return null;

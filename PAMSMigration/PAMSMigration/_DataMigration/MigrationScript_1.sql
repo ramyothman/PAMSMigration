@@ -88,6 +88,10 @@ Select [ID]
 From [ShotecEgypt].[dbo].[CompanyBranches]
 
 SET IDENTITY_INSERT [dbo].[CompanyBranches] OFF;
+GO
+
+update dbo.CompanyBranches set CountryID = 64 where CountryID = 1                      
+update dbo.CompanyBranches set CountryID = 178 where CountryID = 2
 
 GO
 -- Data Migration for Table dbo.IDS --
@@ -124,6 +128,8 @@ SET IDENTITY_INSERT [dbo].[Banks] OFF;
 
 GO
 
+insert into [dbo].BankBranches(BankID,BankAccountNumber,BranchID)
+select ID,'',1 from ShotecEgypt.dbo.Banks
 -- Migrating Category and Products
 
 SET IDENTITY_INSERT [dbo].[Category] ON
@@ -141,7 +147,7 @@ select Migration.fn_GetNewCategoryID(CategoryID, 0, 0), ProductName, ProductID,0
 SET IDENTITY_INSERT [dbo].[ReportsStructures] ON;
 
 insert into [dbo].[ReportsStructures] (ID,ReportName,ItemName,Path,Structure,DisplayName,IsGeneral,BranchID)
-select ID,ReportName,ItemName,Path,Structure,DisplayName,IsGeneral,BranchID from [ShotecEgypt].[dbo].[ReportsStructures] 
+select ID,ReportName,ItemName,Path,Structure,DisplayName,IsGeneral,1 from [ShotecEgypt].[dbo].[ReportsStructures] 
 
 SET IDENTITY_INSERT [dbo].[ReportsStructures] OFF;
 
@@ -152,8 +158,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[ReportConfiguration] ON;
 
-insert into [dbo].[ReportConfiguration] (ID,PrintCoverPage,PrintCoverPageLogo,PrintCoverPageSlogen,PrintCoverPageCompanyStatement,PrintFooterReportName,PrintFooterPageNumber,PrintFooterTodayDate,PrintDetailsLogo,PrintStartReportComment,PrintEndReportComment,ReportLeftMargin,ReportRightMargin,ReportTopMargin,ReportBottomMargin,UserName,ModifiedDate,StartCommentTemplate,EndCommentTemplate)
-select ID,PrintCoverPage,PrintCoverPageLogo,PrintCoverPageSlogen,PrintCoverPageCompanyStatement,PrintFooterReportName,PrintFooterPageNumber,PrintFooterTodayDate,PrintDetailsLogo,PrintStartReportComment,PrintEndReportComment,ReportLeftMargin,ReportRightMargin,ReportTopMargin,ReportBottomMargin,UserName,ModifiedDate,StartCommentTemplate,EndCommentTemplate from [ShotecEgypt].[dbo].[ReportConfiguration] 
+insert into [dbo].[ReportConfiguration] (ID,PrintCoverPage,PrintCoverPageLogo,PrintCoverPageSlogen,PrintCoverPageCompanyStatement,PrintFooterReportName,PrintFooterPageNumber,PrintFooterTodayDate,PrintDetailsLogo,PrintStartReportComment,PrintEndReportComment,ReportLeftMargin,ReportRightMargin,ReportTopMargin,ReportBottomMargin,UserName,ModifiedDate,StartCommentTemplate,EndCommentTemplate,BranchID)
+select ID,PrintCoverPage,PrintCoverPageLogo,PrintCoverPageSlogen,PrintCoverPageCompanyStatement,PrintFooterReportName,PrintFooterPageNumber,PrintFooterTodayDate,PrintDetailsLogo,PrintStartReportComment,PrintEndReportComment,ReportLeftMargin,ReportRightMargin,ReportTopMargin,ReportBottomMargin,UserName,ModifiedDate,StartCommentTemplate,EndCommentTemplate,1 from [ShotecEgypt].[dbo].[ReportConfiguration] 
 
 SET IDENTITY_INSERT [dbo].[ReportConfiguration] OFF;
 
@@ -163,13 +169,14 @@ GO
 
 SET IDENTITY_INSERT [dbo].[CompanySettings] ON;
 
-insert into [dbo].[CompanySettings] (ID,CompanyNameFL,CompanyNameSL,StreetFL,StateFL,CityFL,CountryFL,StreetSL,StateSL,CitySL,CountrySL,ZipCode,PostalCode,Email,CommercialRecord,TaxCard,TaxFile,Phone,Mobile,Fax,WebSite,Slogen,CompanyStatment,Logo,UserName,ModifiedDate,CurrencyExchangeLink,FinancialYearStart,FinancialYearEnd,DueDateNumOfDays,DeliveryTimeNumOfDays,ExpiredGuaranteesNumOfDays,PastProjectsNumOfDays,BaseCurrencyID,ConvertToCompletedProcess,NumOfMinutesPerDay)
-select ID,CompanyNameFL,CompanyNameSL,StreetFL,StateFL,CityFL,CountryFL,StreetSL,StateSL,CitySL,CountrySL,ZipCode,PostalCode,Email,CommercialRecord,TaxCard,TaxFile,Phone,Mobile,Fax,WebSite,Slogen,CompanyStatment,Logo,UserName,ModifiedDate,CurrencyExchangeLink,FinancialYearStart,FinancialYearEnd,DueDateNumOfDays,DeliveryTimeNumOfDays,ExpiredGuaranteesNumOfDays,PastProjectsNumOfDays,Migration.fn_GetNewCurrencyID(BaseCurrencyID, 0, 0),ConvertToCompletedProcess,NumOfMinutesPerDay from [ShotecEgypt].[dbo].[CompanySettings] 
+insert into [dbo].[CompanySettings] (ID,CompanyNameFL,CompanyNameSL,StreetFL,StateFL,CityFL,CountryFL,StreetSL,StateSL,CitySL,CountrySL,ZipCode,PostalCode,Email,CommercialRecord,TaxCard,TaxFile,Phone,Mobile,Fax,WebSite,Slogen,CompanyStatment,Logo,UserName,ModifiedDate,CurrencyExchangeLink,FinancialYearStart,FinancialYearEnd,DueDateNumOfDays,DeliveryTimeNumOfDays,ExpiredGuaranteesNumOfDays,PastProjectsNumOfDays,BaseCurrencyID,ConvertToCompletedProcess,NumOfMinutesPerDay,BranchID)
+select ID,CompanyNameFL,CompanyNameSL,StreetFL,StateFL,CityFL,CountryFL,StreetSL,StateSL,CitySL,CountrySL,ZipCode,PostalCode,Email,CommercialRecord,TaxCard,TaxFile,Phone,Mobile,Fax,WebSite,Slogen,CompanyStatment,Logo,UserName,ModifiedDate,CurrencyExchangeLink,FinancialYearStart,FinancialYearEnd,DueDateNumOfDays,DeliveryTimeNumOfDays,ExpiredGuaranteesNumOfDays,PastProjectsNumOfDays,Migration.fn_GetNewCurrencyID(BaseCurrencyID, 0, 0),ConvertToCompletedProcess,NumOfMinutesPerDay,1 from [ShotecEgypt].[dbo].[CompanySettings] 
 
 SET IDENTITY_INSERT [dbo].[CompanySettings] OFF;
 
 GO
-
+update dbo.CompanyBranches set Logo = (select Logo from CompanySettings)
+GO
 ----------------------------------------------------
 ----------------------------------------------------
 -- Security --
@@ -177,21 +184,24 @@ GO
 ----------------------------------------------------
 
 -- Data Migration for Table dbo.Roles --
-insert into [dbo].[Roles] (Name,IsActive,LimitedSuppliers,EgyptID)
-select Name,IsActive,LimitedSuppliers,ID from [ShotecEgypt].[dbo].[Roles] 
+insert into [dbo].[Roles] (Name,IsActive,LimitedSuppliers,BranchID,EgyptID)
+select Name,IsActive,LimitedSuppliers,1,ID from [ShotecEgypt].[dbo].[Roles] 
 GO
 
+
+SELECT     ID, Migration.fn_GetNewRoleID(RoleId, 0, 0), PageID, SystemFunctionID
+FROM         [ShotecEgypt].[dbo].[RolePrivileges]
 
 -- Data Migration for Table dbo.RoleSuppliers --
 
-SET IDENTITY_INSERT [dbo].[RoleSuppliers] ON;
+--SET IDENTITY_INSERT [dbo].[RoleSuppliers] ON;
  
-insert into [dbo].[RoleSuppliers] (RoleSupplierId,RoleId,SupplierId)
-select RoleSupplierId,Migration.fn_GetNewRoleID(RoleId, 0, 0),Migration.fn_GetNewSupplierID(SupplierId, 0, 0) from [ShotecEgypt].[dbo].[RoleSuppliers] 
+--insert into [dbo].[RoleSuppliers] (RoleSupplierId,RoleId,SupplierId)
+--select RoleSupplierId,Migration.fn_GetNewRoleID(RoleId, 0, 0),Migration.fn_GetNewSupplierID(SupplierId, 0, 0) from [ShotecEgypt].[dbo].[RoleSuppliers] 
 
-SET IDENTITY_INSERT [dbo].[RoleSuppliers] OFF;
+--SET IDENTITY_INSERT [dbo].[RoleSuppliers] OFF;
 
-GO
+--GO
 
 
 
@@ -268,16 +278,16 @@ GO
 
 SET IDENTITY_INSERT [dbo].[ConcurrentUsers] ON;
 
-insert into [dbo].[ConcurrentUsers] (ID,UserID,IPAddress,LoginDate,IsIn,LogoutDate,IsSuspended,SuspensionDate,PulseDate,UserName,ModifiedDate)
-select ID,Migration.[fn_GetNewPersonID](UserID, 0, 0),IPAddress,LoginDate,IsIn,LogoutDate,IsSuspended,SuspensionDate,PulseDate,UserName,ModifiedDate from [ShotecEgypt].[dbo].[ConcurrentUsers] 
+insert into [dbo].[ConcurrentUsers] (ID,UserID,IPAddress,LoginDate,IsIn,LogoutDate,IsSuspended,SuspensionDate,PulseDate,UserName,ModifiedDate,BranchID)
+select ID,Migration.[fn_GetNewPersonID](UserID, 0, 0),IPAddress,LoginDate,IsIn,LogoutDate,IsSuspended,SuspensionDate,PulseDate,UserName,ModifiedDate,1 from [ShotecEgypt].[dbo].[ConcurrentUsers] 
 
 SET IDENTITY_INSERT [dbo].[ConcurrentUsers] OFF;
 
 GO
 
 -- Data Migration for Table Person.PersonExtra --
-insert into [Person].[PersonExtra] (PersonID,NationalityCode,Gender,Religion,BirthDate,BirthPlace,MaritalStatus,SpauseName,EmergencyContactName,EmergencyContactAddress,EmergencyContactNumber,EmergencyContactEmail,HireDate,LeaveDate,IsResponsibleEngineer,Position,Salary,SalaryCurrencyID,ManagerId,OfferApprove,OfferPrepare,OtherInformation,NumOfVacation,EmployeeTypeID)
-select Migration.[fn_GetNewPersonID](PersonID, 0, 0),NationalityCode,Gender,Religion,BirthDate,BirthPlace,MaritalStatus,SpauseName,EmergencyContactName,EmergencyContactAddress,EmergencyContactNumber,EmergencyContactEmail,HireDate,LeaveDate,IsResponsibleEngineer,Position,Salary,SalaryCurrencyID,ManagerId,OfferApprove,OfferPrepare,OtherInformation,NumOfVacation,EmployeeTypeID from [ShotecEgypt].[Person].[PersonExtra] 
+insert into [Person].[PersonExtra] (PersonID,NationalityCode,Gender,Religion,BirthDate,BirthPlace,MaritalStatus,SpauseName,EmergencyContactName,EmergencyContactAddress,EmergencyContactNumber,EmergencyContactEmail,HireDate,LeaveDate,IsResponsibleEngineer,Position,Salary,SalaryCurrencyID,ManagerId,OfferApprove,OfferPrepare,OtherInformation,NumOfVacation,EmployeeTypeID,BranchID)
+select Migration.[fn_GetNewPersonID](PersonID, 0, 0),NationalityCode,Gender,Religion,BirthDate,BirthPlace,MaritalStatus,SpauseName,EmergencyContactName,EmergencyContactAddress,EmergencyContactNumber,EmergencyContactEmail,HireDate,LeaveDate,IsResponsibleEngineer,Position,Salary,SalaryCurrencyID,ManagerId,OfferApprove,OfferPrepare,OtherInformation,NumOfVacation,EmployeeTypeID,1 from [ShotecEgypt].[Person].[PersonExtra] 
 GO
 
 -- Data Migration for Table Person.PersonPhone --
@@ -296,18 +306,37 @@ GO
 SET IDENTITY_INSERT [dbo].[PersonsBranches] ON;
 
 insert into [dbo].[PersonsBranches] (ID,PersonID,BranchID,DefaultBranch,UserName,ModifiedDate)
-select ID,Migration.[fn_GetNewPersonID](PersonID, 0, 0),BranchID,DefaultBranch,UserName,ModifiedDate from [ShotecEgypt].[dbo].[PersonsBranches] 
+select ID,Migration.[fn_GetNewPersonID](PersonID, 0, 0),1,DefaultBranch,UserName,ModifiedDate from [ShotecEgypt].[dbo].[PersonsBranches] 
 
 SET IDENTITY_INSERT [dbo].[PersonsBranches] OFF;
 
 GO
 
+insert into [Person].[PersonLanguages] (PersonId,LanguageId,Title,FirstName,MiddleName,LastName,Suffix,DisplayName)
+select Migration.[fn_GetNewPersonID](PersonID, 0, 0),LanguageId,Title,FirstName,MiddleName,LastName,Suffix,DisplayName from [ShotecEgypt].[Person].[PersonLanguages] 
+
+GO
+
+-- Data Migration for Table Person.PersonPersonTypes --
+
+
+
+insert into [Person].[PersonType] (BusinessEntityId,PersonPersonTypesId,ModifiedDate)
+select Migration.[fn_GetNewPersonID](BusinessEntityId, 0, 0),PersonPersonTypesId,ModifiedDate from [ShotecEgypt].[Person].[PersonType] 
+
+GO
 
 -- Data Migration for Table dbo.UserRoles --
 insert into [dbo].[UserRoles] (RoleID,UserID)
 select Migration.fn_GetNewRoleID(RoleID, 0, 0),Migration.fn_GetNewPersonID(UserID, 0, 0) from [ShotecEgypt].[dbo].[UserRoles] 
 where Migration.fn_GetNewPersonID(UserID, 0, 0) IN (select BusinessEntityID From Person.[Credential])
 GO
+
+
+update Person.PersonLanguages set AcronymName  = SUBSTRING(firstname,1,1)  + SUBSTRING(MiddleName,1,1)+ SUBSTRING(LastName,1,1)
+where AcronymName is null
+GO
+
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 -- Customers --
@@ -367,7 +396,7 @@ GO
 SET IDENTITY_INSERT [dbo].[CustomerBranches] ON;
 
 insert into [dbo].[CustomerBranches] (CustomerBranchID,CustomerID,BranchID)
-select CustomerBranchID,Migration.fn_GetNewCustomerID(CustomerID, 0, 0),BranchID from [ShotecEgypt].[dbo].[CustomerBranches] 
+select CustomerBranchID,Migration.fn_GetNewCustomerID(CustomerID, 0, 0),1 from [ShotecEgypt].[dbo].[CustomerBranches] 
 
 SET IDENTITY_INSERT [dbo].[CustomerBranches] OFF;
 
@@ -386,15 +415,15 @@ insert into [dbo].[Suppliers] (SupplierID,SupplierName,SupplierWebSite,ContactTi
 select [Migration].[fn_GetNewSupplierID](SupplierID, 0, 0),SupplierName,SupplierWebSite,ContactTitle,ContactName,ContactDisplayName,ContactHomePhone,ContactWorkPhone,ContactMobile,ContactEmail,ContactAddress,ContactCountry,ContactCity,ContactZip,ContactFax,UserName,ModifiedDate,HasSubSuppliers,Logo,IsPrincipale,CurrentCompany,SupplierTypeID,IsGeneral,SupplierID from [ShotecEgypt].[dbo].[Suppliers] 
 
 GO
-
+update CompanyBranches Set SupplierID = (Select SupplierID from Suppliers where Suppliers.CurrentCompany = 1)
+GO
 -- Data Migration for Table dbo.SupplierBranch --
 
-SET IDENTITY_INSERT [dbo].[SupplierBranch] ON;
 
-insert into [dbo].[SupplierBranch] (SupplierBranchID,SupplierID,BranchID)
-select SupplierBranchID,Migration.fn_GetNewSupplierID(SupplierID, 0, 0),BranchID from [ShotecEgypt].[dbo].[SupplierBranch] 
 
-SET IDENTITY_INSERT [dbo].[SupplierBranch] OFF;
+insert into [dbo].[SupplierBranch] (SupplierID,BranchID)
+select Migration.fn_GetNewSupplierID(SupplierID, 0, 0),1 from [ShotecEgypt].[dbo].[Suppliers] 
+
 
 GO
 
@@ -414,8 +443,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[SuppliersTargets] ON;
 
-insert into [dbo].[SuppliersTargets] (ID,SupplierID,Year,Value,UserName,ModifiedDate)
-select ID,Migration.fn_GetNewSupplierID(SupplierID, 0, 0),Year,Value,UserName,ModifiedDate from [ShotecEgypt].[dbo].[SuppliersTargets] 
+insert into [dbo].[SuppliersTargets] (ID,SupplierID,Year,Value,UserName,ModifiedDate,BranchID)
+select ID,Migration.fn_GetNewSupplierID(SupplierID, 0, 0),Year,Value,UserName,ModifiedDate,1 from [ShotecEgypt].[dbo].[SuppliersTargets] 
 
 SET IDENTITY_INSERT [dbo].[SuppliersTargets] OFF;
 
@@ -448,8 +477,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[CustomerSupplierRegistration] ON;
 
-insert into [dbo].[CustomerSupplierRegistration] (ID,CustomerID,SupplierID,RegistrationDate,IsRegistered,DeRegistrationDate,UserName,ModifiedDate,RegistrationStatusID,EgyptID)
-select ID,Migration.fn_GetNewCustomerID(CustomerID, 0, 0),Migration.fn_GetNewSupplierID(SupplierID, 0, 0),RegistrationDate,IsRegistered,DeRegistrationDate,UserName,ModifiedDate,RegistrationStatusID,ID from [ShotecEgypt].[dbo].[CustomerSupplierRegistration] 
+insert into [dbo].[CustomerSupplierRegistration] (ID,CustomerID,SupplierID,RegistrationDate,IsRegistered,DeRegistrationDate,UserName,ModifiedDate,RegistrationStatusID,BranchID,EgyptID)
+select ID,Migration.fn_GetNewCustomerID(CustomerID, 0, 0),Migration.fn_GetNewSupplierID(SupplierID, 0, 0),RegistrationDate,IsRegistered,DeRegistrationDate,UserName,ModifiedDate,RegistrationStatusID,1,ID from [ShotecEgypt].[dbo].[CustomerSupplierRegistration] 
 
 SET IDENTITY_INSERT [dbo].[CustomerSupplierRegistration] OFF;
 
@@ -465,8 +494,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[Projects] ON;
 
-insert into [dbo].[Projects] (ProjectCode,ProjectName,ProjectLocation,ProjectDescription,ContactTitle,ContactName,ContactHomePhone,ContactWorkPhone,ContactMobile,ContactEmail,ContactAddress,ContactCountry,ContactCity,ContactZip,ContactFax,UserName,ModifiedDate,ID,FinalProduct,StartDate,EstimatedCost,EstimatedCostCurrencyID,Shareholders,LicenseBy,EngineeringBy,ProcurementBy,Contractor,EPC,VendorlistBy,ProjectStatusID,ContactCompany,ContactPosition,OwnerID,EngineeringByID,ProcurementByID,ContractorID,EgyptID)
-select                        ProjectCode,ProjectName,ProjectLocation,ProjectDescription,ContactTitle,ContactName,ContactHomePhone,ContactWorkPhone,ContactMobile,ContactEmail,ContactAddress,ContactCountry,ContactCity,ContactZip,ContactFax,UserName,ModifiedDate,ID,FinalProduct,StartDate,EstimatedCost,EstimatedCostCurrencyID,Shareholders,LicenseBy,EngineeringBy,ProcurementBy,Contractor,EPC,VendorlistBy,ProjectStatusID,ContactCompany,ContactPosition,Migration.fn_GetNewSupplierID(OwnerID, 0, 0),Migration.fn_GetNewSupplierID(EngineeringByID, 0, 0),Migration.fn_GetNewSupplierID(ProcurementByID, 0, 0),Migration.fn_GetNewSupplierID(ContractorID, 0, 0),ID from [ShotecEgypt].[dbo].[Projects] 
+insert into [dbo].[Projects] (ProjectCode,ProjectName,ProjectLocation,ProjectDescription,ContactTitle,ContactName,ContactHomePhone,ContactWorkPhone,ContactMobile,ContactEmail,ContactAddress,ContactCountry,ContactCity,ContactZip,ContactFax,UserName,ModifiedDate,ID,FinalProduct,StartDate,EstimatedCost,EstimatedCostCurrencyID,Shareholders,LicenseBy,EngineeringBy,ProcurementBy,Contractor,EPC,VendorlistBy,ProjectStatusID,ContactCompany,ContactPosition,OwnerID,EngineeringByID,ProcurementByID,ContractorID,BranchID,EgyptID)
+select                        ProjectCode,ProjectName,ProjectLocation,ProjectDescription,ContactTitle,ContactName,ContactHomePhone,ContactWorkPhone,ContactMobile,ContactEmail,ContactAddress,ContactCountry,ContactCity,ContactZip,ContactFax,UserName,ModifiedDate,ID,FinalProduct,StartDate,EstimatedCost,EstimatedCostCurrencyID,Shareholders,LicenseBy,EngineeringBy,ProcurementBy,Contractor,EPC,VendorlistBy,ProjectStatusID,ContactCompany,ContactPosition,Migration.fn_GetNewSupplierID(OwnerID, 0, 0),Migration.fn_GetNewSupplierID(EngineeringByID, 0, 0),Migration.fn_GetNewSupplierID(ProcurementByID, 0, 0),Migration.fn_GetNewSupplierID(ContractorID, 0, 0),1,ID from [ShotecEgypt].[dbo].[Projects] 
 
 SET IDENTITY_INSERT [dbo].[Projects] OFF;
 
@@ -513,18 +542,19 @@ SET IDENTITY_INSERT [dbo].[ProjectsComments] OFF;
 GO
 
 
+ 
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 -- Jobs     --
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 -- Data Migration for Table dbo.Inquiries --
-insert into [dbo].[Inquiries] (InquiryNumber,ResponsibleEngineerID ,CustomerID,CustomerInquiryNumber,ProductID,InquiryDate,BidDueDate,SupplierID,SupplierQuotationNumber,QuotationPrice,RateToEuro,ONDate,QuotationPriceInEuro,Comment,UserName,ModifiedDate,ProductDescription,ShotecNo,OnHold,InquiryStatusID,OrderPercentage,ProjectTypeID,IsSubOffer,ParentInquiryNumber,OfferDate,ProductTypeID,LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,ProjectID,InquiryTypeID,CurrencyID,FileNo,EgyptID)
+insert into [dbo].[Inquiries] (InquiryNumber,ResponsibleEngineerID ,CustomerID,CustomerInquiryNumber,ProductID,InquiryDate,BidDueDate,SupplierID,SupplierQuotationNumber,QuotationPrice,RateToEuro,ONDate,QuotationPriceInEuro,Comment,UserName,ModifiedDate,ProductDescription,ShotecNo,OnHold,InquiryStatusID,OrderPercentage,ProjectTypeID,IsSubOffer,ParentInquiryNumber,OfferDate,ProductTypeID,LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,ProjectID,InquiryTypeID,CurrencyID,FileNo,BranchID,EgyptID)
 select InquiryNumber,Migration.[fn_GetNewPersonID](ResponsibleEngineerID,0,0),Migration.fn_GetNewCustomerID(CustomerID, 0, 0),CustomerInquiryNumber,Migration.fn_GetNewProductID(ProductID,0,0),InquiryDate,BidDueDate,Migration.fn_GetNewSupplierID(SupplierID, 0, 0),SupplierQuotationNumber,QuotationPrice,RateToEuro,ONDate,QuotationPriceInEuro,Comment,UserName,ModifiedDate,ProductDescription,ShotecNo,OnHold,InquiryStatusID,OrderPercentage,
 (case when ProjectTypeID = 9 OR ProjectTypeID = 10 then 5 else case when ProjectTypeID = 8 then 4 else ProjectTypeID end end) as ProjectTypeID
 ,IsSubOffer,ParentInquiryNumber,OfferDate,
 (case when ProductTypeID = 4 then 1 else ProductTypeID end) as ProductTypeID,
-LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,Migration.fn_GetNewProjectID(ProjectID,0,0),(case when InquiryTypeID = 3 then 1 else InquiryTypeID end) as InquiryTypeID,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),FileNo,InquiryNumber from [ShotecEgypt].[dbo].[Inquiries] 
+LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,Migration.fn_GetNewProjectID(ProjectID,0,0),(case when InquiryTypeID = 3 then 1 else InquiryTypeID end) as InquiryTypeID,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),FileNo,1,InquiryNumber from [ShotecEgypt].[dbo].[Inquiries] 
 GO
 
 
@@ -575,6 +605,10 @@ where Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0') IN (select Inqui
 Update [dbo].[Inquiries] set ProjectTypeID = 7
 where Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0') IN (select InquiryNumber from ShotecEgypt.dbo.Losts where LostReasonID = 6)
 
+update Inquiries Set PriceBaseID = o.PriceBaseID, PaymentBaseID = o.PaymentTypeID 
+From Inquiries inner join Orders as o on Inquiries.InquiryNumber = o.InquiryNumber
+
+GO
 SET IDENTITY_INSERT [dbo].[Losts] ON;
 
 insert into [dbo].[Losts] (LostID,InquiryNumber,Comment,UserName,ModifiedDate,WinnerName,WinnerPrice,WinnerPriceInEuro,RateToEuro,RateDate,IsSubLost,ParentInquiryNumber,LostComment,LostPrice,LostPriceRateToEuro,LostPriceRateDate,LostPriceInEuro,WinnerPriceCurrencyID,LostPriceCurrencyID,LostReasonID,EgyptID)
@@ -585,8 +619,8 @@ SET IDENTITY_INSERT [dbo].[Losts] OFF;
 GO
 
 -- Data Migration for Table dbo.Transactions --
-insert into [dbo].[Transactions] (TransactionID,SupplierID,InquiryCode,Amount,TransactionDate,Reason,Reference,RateToEuro,AmountInEuro,CurrencyID,BankID,EgyptID)
-select TransactionID,SupplierID,InquiryCode,Amount,TransactionDate,Reason,Reference,RateToEuro,AmountInEuro,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),Migration.fn_GetNewBankID(BankID, 0, 0),TransactionID from [ShotecEgypt].[dbo].[Transactions] 
+insert into [dbo].[Transactions] (TransactionID,SupplierID,InquiryCode,Amount,TransactionDate,Reason,Reference,RateToEuro,AmountInEuro,CurrencyID,BankID,BranchID,EgyptID)
+select TransactionID,SupplierID,InquiryCode,Amount,TransactionDate,Reason,Reference,RateToEuro,AmountInEuro,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),Migration.fn_GetNewBankID(BankID, 0, 0),1,TransactionID from [ShotecEgypt].[dbo].[Transactions] 
 GO
 
 -- Data Migration for Table dbo.CommissionPayments --
@@ -605,11 +639,20 @@ GO
 SET IDENTITY_INSERT [dbo].[ProjectsGuarantee] ON;
 
 insert into [dbo].[ProjectsGuarantee] (ID,GuaranteeNumber,InquiryNumber,GuaranteeTypeID,PercentageFromOffer,Amount,IssuingDate,BankBranch,Remarks,GuaranteeCopy,NextStepID,GuaranteeCurrentLocationID,UserName,ModifiedDate,ExpiryDate,IsActive,IssuingBy,CalculationMethod,CurrencyID,BankID,InActiveDate,EgyptID)
-select ID,GuaranteeNumber,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),GuaranteeTypeID,PercentageFromOffer,Amount,IssuingDate,BankBranch,Remarks,GuaranteeCopy,NextStepID,GuaranteeCurrentLocationID,UserName,ModifiedDate,ExpiryDate,IsActive,Migration.fn_GetNewPersonID(IssuingBy,0,0),CalculationMethod,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),Migration.fn_GetNewBankID(BankID, 0, 0),InActiveDate,ID from [ShotecEgypt].[dbo].[ProjectsGuarantee] 
+select ID,GuaranteeNumber,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),GuaranteeTypeID,PercentageFromOffer,Amount,IssuingDate,BankBranch,Remarks,GuaranteeCopy,NextStepID,GuaranteeCurrentLocationID,UserName,ModifiedDate,ExpiryDate,IsActive,Migration.fn_GetNewSupplierID(IssuingBy,0,0),CalculationMethod,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),Migration.fn_GetNewBankID(BankID, 0, 0),InActiveDate,ID from [ShotecEgypt].[dbo].[ProjectsGuarantee] 
 
 SET IDENTITY_INSERT [dbo].[ProjectsGuarantee] OFF;
 
 GO
+
+update ProjectsGuarantee set GuaranteeStatusID = 3 where isactive = 0
+ GO
+
+ update ProjectsGuarantee set GuaranteeStatusID = 1 where IssuingDate is null
+ GO
+
+ update ProjectsGuarantee set GuaranteeStatusID = 2 where GuaranteeStatusID is null
+ GO
 
 SET IDENTITY_INSERT [dbo].[ProjectsGuaranteeRenews] ON;
 
@@ -626,11 +669,13 @@ SET IDENTITY_INSERT [dbo].[CustomerPayments] ON;
 
 insert into [dbo].[CustomerPayments] (CustomerPaymentID,InquiryNumber,PaymentNumber,PaidAmount,ONDate,SumPaid,Deduction,DeductionNumber,DeductionAmount,Reason,SumDeduction,RestPayment,Comment,UserName,ModifiedDate,PaidAmountRateToEuro,PaidAmountInEuro,PaidAmountRateDate,DeductionAmountRateToEuro,DeductionAmountInEuro,DeductionAmountRateDate,PaidAmountCurrencyID,DeductionAmountCurrencyID,InvoiceNumber)
 select CustomerPaymentID,Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0'),PaymentNumber,PaidAmount,ONDate,SumPaid,Deduction,DeductionNumber,DeductionAmount,Reason,SumDeduction,RestPayment,Comment,UserName,ModifiedDate,PaidAmountRateToEuro,PaidAmountInEuro,PaidAmountRateDate,DeductionAmountRateToEuro,DeductionAmountInEuro,DeductionAmountRateDate,Migration.fn_GetNewCurrencyID(PaidAmountCurrencyID, 0, 0),Migration.fn_GetNewCurrencyID(DeductionAmountCurrencyID, 0, 0),InvoiceNumber from [ShotecEgypt].[dbo].[CustomerPayments] 
+where Migration.fn_GetNewInquiryNumber(InquiryNumber, '0', '0') in (select InquiryNumber from dbo.Inquiries)
 
 SET IDENTITY_INSERT [dbo].[CustomerPayments] OFF;
 
 GO
-
+update CustomerPayments set currencyid = PaidAmountCurrencyID 
+Go
 
 -- Data Migration for Table dbo.Commissions --
 
@@ -641,14 +686,36 @@ select InquiryNumber,0,0,ONDate,0,0,0,0,'',0,CommissionAmountInEuro,'',UserName,
 left join dbo.CustomerPayments as c on com.InquiryNumber COLLATE SQL_Latin1_General_CP1_CI_AS = c.InquiryNumber
 where c.CustomerPaymentID is null) as s
 
+GO
 
+delete from dbo.CustomerPayments where InquiryNumber not in (select InquiryNumber from dbo.Inquiries)
+GO
 
-insert into [dbo].[Commissions] (CustomerPaymentID,InquiryNumber,PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,MinPriceCommissionBase,MinPercentPriceCommissionBase,MinCommissionAmount,MinPercentCommissionAmount,BankID,CurrencyID)
-select c.CustomerPaymentID,Migration.fn_GetNewInquiryNumber(com.InquiryNumber, 0, 0),com.PriceCommissionBase,com.PercentPriceCommissionBase,com.CommissionPercent,com.CommissionAmount,com.RateToEuro,com.ONDate,com.CommissionAmountInEuro,com.Comment,com.Paid,com.UserName,com.ModifiedDate,com.MinPriceCommissionBase,com.MinPercentPriceCommissionBase,com.MinCommissionAmount,com.MinPercentCommissionAmount,Migration.fn_GetNewBankID(com.BankID, 0, 0),Migration.fn_GetNewCurrencyID(com.CurrencyID, 0, 0) from [ShotecEgypt].[dbo].[Commissions]  as com
-left join dbo.CustomerPayments as c on com.InquiryNumber = Migration.fn_GetNewInquiryNumber(c.InquiryNumber, 0, 0)
+insert into [dbo].[CustomerPayments] (InquiryNumber,PaymentNumber,PaidAmount,ONDate,SumPaid,Deduction,DeductionNumber,DeductionAmount,Reason,SumDeduction,RestPayment,Comment,UserName,ModifiedDate,PaidAmountRateToEuro,PaidAmountInEuro,PaidAmountRateDate,DeductionAmountRateToEuro,DeductionAmountInEuro,DeductionAmountRateDate,PaidAmountCurrencyID,DeductionAmountCurrencyID,InvoiceNumber)
+select Migration.fn_GetNewInquiryNumber(InquiryNumber,'0','0'), 0,0,null, 0, 0, 0, 0, 'Migration', 0, 0,'Migration', 'admin', GETDATE(), RateToEuro , 0, ONDate, 0, 0, null, Migration.fn_GetNewCurrencyID(CurrencyID,0,0), null, null
+From 
+ShotecEgypt.dbo.Orders Where InquiryNumber 
+IN (select InquiryNumber from
+ShotecEgypt.dbo.Commissions where InquiryNumber Not In
+ (select InquiryNumber from ShotecEgypt.dbo.CustomerPayments))
+ 
+ GO
 
+insert into [dbo].[Commissions] (CustomerPaymentID,InquiryNumber,PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent,CommissionAmount,RateToEuro,ONDate,CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,BankID,CurrencyID,BranchID)
+select CustomerPaymentID, Migration.fn_GetNewInquiryNumber(InquiryNumber, 0, 0),PriceCommissionBase,PercentPriceCommissionBase,CommissionPercent, PaidAmount * PercentPriceCommissionBase * CommissionPercent as CommissionAmount,PaidAmountRateToEuro,PaidAmountRateDate,PaidAmount * PercentPriceCommissionBase *  CommissionPercent * PaidAmountRateToEuro as CommissionAmountInEuro,Comment,Paid,UserName,ModifiedDate,Migration.fn_GetNewBankID(BankID, 0, 0),Migration.fn_GetNewCurrencyID(PaidAmountCurrencyID, 0, 0),1 from (
+select cp.*,c.PriceCommissionBase, c.PercentPriceCommissionBase,c.CommissionPercent,c.Comment as CommissionComment, c.Paid, c.MinPriceCommissionBase, c.MinPercentPriceCommissionBase, c.BankID 
+From dbo.CustomerPayments as cp
+inner Join dbo.Inquiries as i on i.InquiryNumber = cp.InquiryNumber
+left Join ShotecEgypt.dbo.Commissions as c on cp.InquiryNumber collate SQL_Latin1_General_CP1_CI_AS = c.InquiryNumber
+where i.SupplierID <> 14
+) as s
 
 GO
+
+Update dbo.Orders set dbo.Orders.CommissionPercent =  ShotecEgypt.dbo.Commissions.CommissionPercent, CommissionCurrencyID = ShotecEgypt.dbo.commissions.CurrencyID, CommissionRateToEuro = ShotecEgypt.dbo.commissions.RateToEuro, CommissionRateDate = ShotecEgypt.dbo.commissions.ONDate, dbo.Orders.CommissionAmount = ShotecEgypt.dbo.commissions.CommissionAmount, dbo.Orders.CommissionAmountInEuro = ShotecEgypt.dbo.commissions.CommissionAmountInEuro
+From dbo.Orders Inner Join
+ShotecEgypt.dbo.Commissions on dbo.Orders.InquiryNumber collate SQL_Latin1_General_CP1_CI_AS =
+ShotecEgypt.dbo.Commissions.InquiryNumber 
 
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -676,6 +743,7 @@ select PartialShipmentID,ShipmentNumber,InvoiceNumber,Migration.fn_GetNewInquiry
 
 SET IDENTITY_INSERT [dbo].[PartialShipment] OFF;
 
+update dbo.PartialShipment set InvoiceValue = Price, InvoiceValueinEuro = PriceInEuro
 GO
 
 -- Data Migration for Table dbo.PartialShipmentDetails --
@@ -729,7 +797,7 @@ GO
 
 -- Data Migration for Table dbo.InquiriesYearlyHistory --
 insert into [dbo].[InquiriesYearlyHistory] (InquiryNumber,ResponsibleEngineerID,CustomerID,CustomerInquiryNumber,ProductID,InquiryDate,BidDueDate,SupplierID,SupplierQuotationNumber,QuotationPrice,RateToEuro,ONDate,QuotationPriceInEuro,Comment,UserName,ModifiedDate,ProductDescription,ShotecNo,OnHold,InquiryStatusID,OrderPercentage,ProjectTypeID,IsSubOffer,ParentInquiryNumber,OfferDate,ProductTypeID,LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,ProjectID,InquiryTypeID,CurrencyID,Year,BranchID)
-select Migration.fn_GetNewInquiryNumber(InquiryNumber,'0', '0'),Migration.fn_GetNewPersonID(ResponsibleEngineerID,0,0) as  ResponsibleEngineerID,Migration.fn_GetNewCustomerID(CustomerID, 0, 0),CustomerInquiryNumber,Migration.fn_GetNewProductID(ProductID,0,0) as ProductID,InquiryDate,BidDueDate,Migration.fn_GetNewSupplierID(SupplierID, 0, 0),SupplierQuotationNumber,QuotationPrice,RateToEuro,ONDate,QuotationPriceInEuro,Comment,UserName,ModifiedDate,ProductDescription,ShotecNo,OnHold,InquiryStatusID,OrderPercentage,(case when ProjectTypeID = 9 OR ProjectTypeID = 10 then 5 else case when ProjectTypeID = 8 then 4 else ProjectTypeID end end) as ProjectTypeID,IsSubOffer,ParentInquiryNumber,OfferDate,(case when ProductTypeID = 4 then 1 else ProductTypeID end) as ProductTypeID,LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,Migration.fn_GetNewProjectID(ProjectID,0,0),InquiryTypeID,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),[Year],BranchID from [ShotecEgypt].[dbo].[InquiriesYearlyHistory] 
+select Migration.fn_GetNewInquiryNumber(InquiryNumber,'0', '0'),Migration.fn_GetNewPersonID(ResponsibleEngineerID,0,0) as  ResponsibleEngineerID,Migration.fn_GetNewCustomerID(CustomerID, 0, 0),CustomerInquiryNumber,Migration.fn_GetNewProductID(ProductID,0,0) as ProductID,InquiryDate,BidDueDate,Migration.fn_GetNewSupplierID(SupplierID, 0, 0),SupplierQuotationNumber,QuotationPrice,RateToEuro,ONDate,QuotationPriceInEuro,Comment,UserName,ModifiedDate,ProductDescription,ShotecNo,OnHold,InquiryStatusID,OrderPercentage,(case when ProjectTypeID = 9 OR ProjectTypeID = 10 then 5 else case when ProjectTypeID = 8 then 4 else ProjectTypeID end end) as ProjectTypeID,IsSubOffer,ParentInquiryNumber,OfferDate,(case when ProductTypeID = 4 then 1 else ProductTypeID end) as ProductTypeID,LostPercentage,CancelledPercentage,LateResponsePercentage,OrderChanceID,HasGuarantee,Migration.fn_GetNewProjectID(ProjectID,0,0),InquiryTypeID,Migration.fn_GetNewCurrencyID(CurrencyID, 0, 0),[Year],1 from [ShotecEgypt].[dbo].[InquiriesYearlyHistory] 
 GO
 
 -- Data Migration for Table dbo.ProjectsHistoryYearlyHistory --
@@ -822,8 +890,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[Notifications] ON;
 
-insert into [dbo].[Notifications] (ID,NotificationTypeID,Notification,PersonID,RelatedFormName,RelatedID,UserName,ModifiedDate,EgyptID)
-select ID,NotificationTypeID,[Notification],Migration.fn_GetNewPersonID(PersonID,0,0),RelatedFormName,(case when NotificationTypeID = 1 then Migration.fn_GetNewProjectID(RelatedID,0,0) else RelatedID end)as RelatedID,UserName,ModifiedDate,ID from [ShotecEgypt].[dbo].[Notifications] 
+insert into [dbo].[Notifications] (ID,NotificationTypeID,Notification,PersonID,RelatedFormName,RelatedID,UserName,ModifiedDate,BranchID,EgyptID)
+select ID,NotificationTypeID,[Notification],Migration.fn_GetNewPersonID(PersonID,0,0),RelatedFormName,(case when NotificationTypeID = 1 then Migration.fn_GetNewProjectID(RelatedID,0,0) else RelatedID end)as RelatedID,UserName,ModifiedDate,1,ID from [ShotecEgypt].[dbo].[Notifications] 
 
 SET IDENTITY_INSERT [dbo].[Notifications] OFF;
 
@@ -854,8 +922,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[Visits] ON;
 
-insert into [dbo].[Visits] (VisitId,VisitNo,CustomerId,Finalized,StartDateTime,EndDateTime,Accomplishment,PendingTasks,VisitComments,Place,Reason,VisitCopy,ReportDate,EgyptID)
-select VisitId,VisitNo,Migration.fn_GetNewCustomerID(CustomerId,0,0),Finalized,StartDateTime,EndDateTime,Accomplishment,PendingTasks,VisitComments,Place,Reason,VisitCopy,ReportDate,VisitId from [ShotecEgypt].[dbo].[Visits] 
+insert into [dbo].[Visits] (VisitId,VisitNo,CustomerId,Finalized,StartDateTime,EndDateTime,Accomplishment,PendingTasks,VisitComments,Place,Reason,VisitCopy,ReportDate,BranchID,EgyptID)
+select VisitId,VisitNo,Migration.fn_GetNewCustomerID(CustomerId,0,0),Finalized,StartDateTime,EndDateTime,Accomplishment,PendingTasks,VisitComments,Place,Reason,VisitCopy,ReportDate,1,VisitId from [ShotecEgypt].[dbo].[Visits] 
 
 SET IDENTITY_INSERT [dbo].[Visits] OFF;
 
@@ -912,16 +980,19 @@ GO
 ----------------------------------------------------------------------
 
 -- Data Migration for Table dbo.PersonYearlyVacations --
-insert into [dbo].[PersonYearlyVacations] (PersonID,[Year])
-select Migration.[fn_GetNewPersonID](PersonID, 0, 0),[Year] from [ShotecEgypt].[dbo].[PersonYearlyVacations] 
+
+insert into [dbo].[PersonYearlyVacations] (PersonID,[Year], NumOfVacationsAnnual , NumOfVacationsCasual ,BranchID)
+select Migration.[fn_GetNewPersonID](PersonID, 0, 0),[Year],
+case when  NumOfVacations = 21 then 14 when NumOfVacations = 30 then 23 else 0 end as NumOfVacationsAnnual, case when  NumOfVacations < 21 then NumOfVacations else 7 end as NumOfVacationsCasual , 1
+from [ShotecEgypt].[dbo].[PersonYearlyVacations] 
 GO
 
 -- Data Migration for Table dbo.EmployeeHourRate --
 
 SET IDENTITY_INSERT [dbo].[EmployeeHourRate] ON;
 
-insert into [dbo].[EmployeeHourRate] (ID,[Year],Value,UserName,ModifiedDate,EgyptID)
-select ID,[Year],Value,UserName,ModifiedDate,ID from [ShotecEgypt].[dbo].[EmployeeHourRate] 
+insert into [dbo].[EmployeeHourRate] (ID,[Year],Value,UserName,ModifiedDate,BranchID,EgyptID)
+select ID,[Year],Value,UserName,ModifiedDate,1,ID from [ShotecEgypt].[dbo].[EmployeeHourRate] 
 
 SET IDENTITY_INSERT [dbo].[EmployeeHourRate] OFF;
 
@@ -931,8 +1002,8 @@ GO
 
 SET IDENTITY_INSERT [dbo].[TimeSheet] ON;
 
-insert into [dbo].[TimeSheet] (ID,PersonID,SheetDate,UserName,ModifiedDate,EgyptID)
-select ID,Migration.[fn_GetNewPersonID](PersonID, 0, 0),SheetDate,UserName,ModifiedDate,ID from [ShotecEgypt].[dbo].[TimeSheet] 
+insert into [dbo].[TimeSheet] (ID,PersonID,SheetDate,UserName,ModifiedDate,BranchID,EgyptID)
+select ID,Migration.[fn_GetNewPersonID](PersonID, 0, 0),SheetDate,UserName,ModifiedDate,1,ID from [ShotecEgypt].[dbo].[TimeSheet] 
 
 SET IDENTITY_INSERT [dbo].[TimeSheet] OFF;
 
@@ -960,16 +1031,13 @@ SET IDENTITY_INSERT [dbo].[VacationTypes] OFF
 GO
 
 -- Data Migration for Table dbo.EmployeeVacations --
-
 SET IDENTITY_INSERT [dbo].[EmployeeVacations] ON;
 
-insert into [dbo].[EmployeeVacations] (EmployeeVacationID, VacationTypeId,StartDate,EndDate,RequestDate,ApprovedDate,IsApproved,ModifiedDate,VacationReportWayID,NumOfDays,Comment,UserName)
-select EmployeeVacationID, VacationTypeId,StartDate,EndDate,RequestDate,ApprovedDate,IsApproved,ModifiedDate,VacationReportWayID,NumOfDays,Comment,UserName from [ShotecEgypt].[dbo].[EmployeeVacations] 
+insert into [dbo].[EmployeeVacations] (EmployeeVacationID,PersonID, VacationTypeId,StartDate,EndDate,RequestDate,ApprovedDate,IsApproved,ModifiedDate,VacationReportWayID,NumOfDays,Comment,UserName)
+select EmployeeVacationID,Migration.fn_GetNewPersonID(PersonID, 0,0), VacationTypeId,StartDate,EndDate,RequestDate,ApprovedDate,IsApproved,ModifiedDate,VacationReportWayID,NumOfDays,Comment,UserName from [ShotecEgypt].[dbo].[EmployeeVacations]
+where Migration.fn_GetNewPersonID(PersonID,0,0) IN (select BusinessEntityID from Person.Person)
 
 SET IDENTITY_INSERT [dbo].[EmployeeVacations] OFF;
-
-GO
-
 
 
 --------------
@@ -999,3 +1067,4 @@ select ID,TweetText,TweetByID,TweetBy,TweetByRealName,TweetTypeID,ModifiedDate,I
 SET IDENTITY_INSERT [dbo].[BussinessTwitter] OFF;
 
 GO
+

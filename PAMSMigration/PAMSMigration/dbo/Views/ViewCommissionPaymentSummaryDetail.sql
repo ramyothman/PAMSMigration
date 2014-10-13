@@ -1,17 +1,13 @@
-CREATE VIEW dbo.ViewPaymentTotals
+﻿CREATE VIEW dbo.ViewCommissionPaymentSummaryDetail
 AS
-SELECT     InquiryNumber, ISNULL(SUM(PaidAmountInEuro), 0) AS Paid, ISNULL(SUM(DeductionAmountInEuro), 0) AS Deducted,
-                          (SELECT     SUM(PriceInEuro) AS Expr1
-                            FROM          dbo.PartialShipment
-                            WHERE      (InquiryNumber = dbo.CustomerPayments.InquiryNumber)) AS Shipment, ISNULL
-                          ((SELECT     SUM(InvoiceValueinEuro) AS Expr1
-                              FROM         dbo.PartialShipment AS PartialShipment_1
-                              WHERE     (InquiryNumber = dbo.CustomerPayments.InquiryNumber)) - (SUM(PaidAmountInEuro) + SUM(DeductionAmountInEuro)), 0) AS Outstanding
-FROM         dbo.CustomerPayments
-GROUP BY InquiryNumber
-
+SELECT     CAST(ISNULL(IsPaid, 1) AS bit) AS IsPaid, dbo.fn_GetRemainingCommission(InquiryNumber) AS RemainCommission, dbo.fn_GetPaidCommission(InquiryNumber) AS PaidCommissionAmount, 
+                      dbo.fn_GetCommissionBranchID(InquiryNumber) AS BranchID, dbo.fn_GetCommissionAmount(InquiryNumber) AS CommissionAmount, InquiryNumber, ONDate
+FROM         dbo.CommissionPayments
+WHERE     (InquiryNumber IN
+                          (SELECT     InquiryNumber
+                            FROM          dbo.Commissions))
 GO
-EXECUTE sp_addextendedproperty @name = N'MS_DiagramPaneCount', @value = 1, @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewPaymentTotals';
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPaneCount', @value = 1, @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewCommissionPaymentSummaryDetail';
 
 
 GO
@@ -20,7 +16,7 @@ Begin DesignProperties =
    Begin PaneConfigurations = 
       Begin PaneConfiguration = 0
          NumPanes = 4
-         Configuration = "(H (1[12] 4[43] 2[30] 3) )"
+         Configuration = "(H (1[38] 4[22] 2[18] 3) )"
       End
       Begin PaneConfiguration = 1
          NumPanes = 3
@@ -86,15 +82,15 @@ Begin DesignProperties =
          Left = 0
       End
       Begin Tables = 
-         Begin Table = "CustomerPayments"
+         Begin Table = "CommissionPayments"
             Begin Extent = 
-               Top = 126
+               Top = 6
                Left = 38
-               Bottom = 303
-               Right = 285
+               Bottom = 273
+               Right = 291
             End
             DisplayFlags = 280
-            TopColumn = 20
+            TopColumn = 2
          End
       End
    End
@@ -107,7 +103,7 @@ Begin DesignProperties =
          Width = 284
          Width = 1500
          Width = 1500
-         Width = 1500
+         Width = 2040
          Width = 1500
          Width = 1500
          Width = 1500
@@ -116,7 +112,7 @@ Begin DesignProperties =
       End
    End
    Begin CriteriaPane = 
-      Begin ColumnWidths = 12
+      Begin ColumnWidths = 11
          Column = 1440
          Alias = 900
          Table = 1170
@@ -133,5 +129,5 @@ Begin DesignProperties =
       End
    End
 End
-', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewPaymentTotals';
+', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewCommissionPaymentSummaryDetail';
 

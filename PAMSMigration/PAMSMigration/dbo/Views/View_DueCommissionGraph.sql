@@ -1,9 +1,9 @@
 ﻿CREATE VIEW dbo.View_DueCommissionGraph
 AS
-SELECT     CustomerID, CompanyName AS CustomerName, SupplierID, SupplierName, Delivered, SUM(CASE WHEN Paid = 1 THEN 0 ELSE CommissionAmountInEuro - PaidCommissionAmount END) 
-                      AS PriceInEuro, YEAR(DeliveredON) AS Year, BranchID, BranchNameFL, CountryID, CountryName, CompanyCode
+SELECT     CustomerID, CompanyName AS CustomerName, SupplierID, SupplierName, Delivered, SUM(dbo.fn_GetCommissionDue(InquiryNumber, BranchID)) AS PriceInEuro, YEAR(DeliveredON) AS Year, 
+                      BranchID, BranchNameFL, CountryID, CountryName, CompanyCode
 FROM         dbo.ViewCommissions
-GROUP BY CustomerID, CompanyName, SupplierID, SupplierName, YEAR(DeliveredON), Delivered, BranchID, BranchNameFL, CountryID, CountryName, CompanyCode, PaidCommissionAmount
+GROUP BY CustomerID, CompanyName, SupplierID, SupplierName, YEAR(DeliveredON), Delivered, BranchID, BranchNameFL, CountryID, CountryName, CompanyCode
 
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane1', @value = N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
@@ -11,7 +11,7 @@ Begin DesignProperties =
    Begin PaneConfigurations = 
       Begin PaneConfiguration = 0
          NumPanes = 4
-         Configuration = "(H (1[37] 4[27] 2[17] 3) )"
+         Configuration = "(H (1[27] 4[11] 2[34] 3) )"
       End
       Begin PaneConfiguration = 1
          NumPanes = 3
@@ -85,7 +85,7 @@ Begin DesignProperties =
                Right = 297
             End
             DisplayFlags = 280
-            TopColumn = 36
+            TopColumn = 0
          End
       End
    End
@@ -129,6 +129,8 @@ Begin DesignProperties =
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'View_DueCommissionGraph';
+
+
 
 
 GO

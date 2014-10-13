@@ -13,11 +13,12 @@ RETURNS int
 AS
 BEGIN
 	
-	declare @TotalDays decimal(18,1)
+	declare @TotalDays int
 	
 	select @TotalDays = Sum(NumOfDays) from [dbo].[EmployeeVacations] 
 	where (Year(StartDate) = @Year or Year(EndDate) = @Year) and PersonID = @EmployeeID
-	     and (VacationTypeID = 1 or VacationTypeID = 2 )
+	     and (VacationTypeID = 1 or VacationTypeID = 2 or VacationTypeID = 9 )
 	
-	return ISNull(@TotalDays,0.0)
+	return ISNull(@TotalDays,0)
+
 END

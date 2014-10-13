@@ -1,17 +1,15 @@
 ﻿CREATE VIEW dbo.ViewSubCommissionPayments
 AS
-SELECT     dbo.Commissions.InquiryNumber, CASE WHEN SUM(dbo.CommissionPayments.PaidCommissionAmountInEuro) IS NULL 
-                      THEN 0 ELSE SUM(dbo.CommissionPayments.PaidCommissionAmountInEuro) END AS PaidCommissionAmount, dbo.Commissions.CommissionAmountInEuro AS CommissionAmount, 
-                      dbo.CommissionPayments.ONDate AS CommissionPaymentDate, dbo.Commissions.BranchID, dbo.CompanyBranches.BranchNameFL, dbo.CompanyBranches.BranchNameSL, 
-                      dbo.CompanyBranches.CountryID, dbo.CompanyCountries.CountryName, dbo.CommissionPayments.IsPaid, SUM(ISNULL(dbo.Orders.PriceInEuro, 0) 
-                      * ISNULL(dbo.Orders.PercentPriceCommissionBase, 0) * ISNULL(dbo.Commissions.CommissionPercent, 0) - dbo.GetSumJobCommissionTransactions(dbo.Orders.InquiryNumber)) 
-                      AS RemainCommission
-FROM         dbo.CompanyCountries INNER JOIN
-                      dbo.CompanyBranches ON dbo.CompanyCountries.ID = dbo.CompanyBranches.CountryID INNER JOIN
-                      dbo.Commissions ON dbo.CompanyBranches.ID = dbo.Commissions.BranchID INNER JOIN
-                      dbo.Orders ON dbo.Commissions.InquiryNumber = dbo.Orders.InquiryNumber LEFT OUTER JOIN
-                      dbo.CommissionPayments ON dbo.CommissionPayments.InquiryNumber = dbo.Commissions.InquiryNumber
-GROUP BY dbo.Commissions.InquiryNumber, dbo.Commissions.CommissionAmountInEuro, dbo.CommissionPayments.ONDate, dbo.Commissions.BranchID, dbo.CompanyBranches.BranchNameFL, 
+SELECT     dbo.Orders.InquiryNumber, ISNULL(SUM(dbo.CommissionPayments.PaidCommissionAmountInEuro), 0) AS PaidCommissionAmount, dbo.Orders.CommissionAmountInEuro AS CommissionAmount, 
+                      dbo.CommissionPayments.ONDate AS CommissionPaymentDate, dbo.Inquiries.BranchID, dbo.CompanyBranches.BranchNameFL, dbo.CompanyBranches.BranchNameSL, 
+                      dbo.CompanyBranches.CountryID, dbo.CompanyCountries.CountryName, dbo.CommissionPayments.IsPaid, 
+                      SUM(dbo.Orders.CommissionAmountInEuro - dbo.GetSumJobCommissionTransactions(dbo.Orders.InquiryNumber)) AS RemainCommission
+FROM         dbo.Inquiries INNER JOIN
+                      dbo.Orders ON dbo.Inquiries.InquiryNumber = dbo.Orders.InquiryNumber INNER JOIN
+                      dbo.CommissionPayments ON dbo.Orders.InquiryNumber = dbo.CommissionPayments.InquiryNumber INNER JOIN
+                      dbo.CompanyCountries INNER JOIN
+                      dbo.CompanyBranches ON dbo.CompanyCountries.ID = dbo.CompanyBranches.CountryID ON dbo.Inquiries.BranchID = dbo.CompanyBranches.ID
+GROUP BY dbo.Orders.InquiryNumber, dbo.Orders.CommissionAmountInEuro, dbo.CommissionPayments.ONDate, dbo.Inquiries.BranchID, dbo.CompanyBranches.BranchNameFL, 
                       dbo.CompanyBranches.BranchNameSL, dbo.CompanyBranches.CountryID, dbo.CompanyCountries.CountryName, dbo.CommissionPayments.IsPaid
 
 GO
@@ -20,7 +18,7 @@ Begin DesignProperties =
    Begin PaneConfigurations = 
       Begin PaneConfiguration = 0
          NumPanes = 4
-         Configuration = "(H (1[14] 4[47] 2[5] 3) )"
+         Configuration = "(H (1[24] 4[30] 2[18] 3) )"
       End
       Begin PaneConfiguration = 1
          NumPanes = 3
@@ -82,46 +80,26 @@ Begin DesignProperties =
    End
    Begin DiagramPane = 
       Begin Origin = 
-         Top = -96
+         Top = -288
          Left = 0
       End
       Begin Tables = 
          Begin Table = "CompanyCountries"
             Begin Extent = 
-               Top = 0
-               Left = 284
-               Bottom = 120
-               Right = 460
+               Top = 57
+               Left = 0
+               Bottom = 177
+               Right = 210
             End
             DisplayFlags = 280
             TopColumn = 0
          End
          Begin Table = "CompanyBranches"
             Begin Extent = 
-               Top = 147
-               Left = 0
-               Bottom = 267
-               Right = 254
-            End
-            DisplayFlags = 280
-            TopColumn = 0
-         End
-         Begin Table = "Commissions"
-            Begin Extent = 
-               Top = 129
+               Top = 75
                Left = 283
-               Bottom = 249
-               Right = 542
-            End
-            DisplayFlags = 280
-            TopColumn = 5
-         End
-         Begin Table = "CommissionPayments"
-            Begin Extent = 
-               Top = 78
-               Left = 789
-               Bottom = 198
-               Right = 1058
+               Bottom = 266
+               Right = 537
             End
             DisplayFlags = 280
             TopColumn = 0
@@ -136,6 +114,26 @@ Begin DesignProperties =
             DisplayFlags = 280
             TopColumn = 0
          End
+         Begin Table = "CommissionPayments"
+            Begin Extent = 
+               Top = 302
+               Left = 360
+               Bottom = 422
+               Right = 629
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "Inquiries"
+            Begin Extent = 
+               Top = 36
+               Left = 598
+               Bottom = 156
+               Right = 826
+            End
+            DisplayFlags = 280
+            TopColumn = 34
+         End
       End
    End
    Begin SQLPane = 
@@ -146,27 +144,35 @@ Begin DesignProperties =
       Begin ColumnWidths = 12
          Width = 284
          Width = 1500
-         Width = 1500
+         Width = 2550
          Width = 3015
          Width = 2640
          Width = 1500
          Width = 1500
          Width = 1500
          Width = 1500
-         Width = 1500
-         Width = 1500
+         Width = 900
+         Width = 960
          Width = 1500
       End
    End
-   Begi', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewSubCommissionPayments';
+   Begin ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewSubCommissionPayments';
+
+
+
+
+
+
+
+
 
 
 GO
-EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'n CriteriaPane = 
+EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'CriteriaPane = 
       Begin ColumnWidths = 12
-         Column = 1440
-         Alias = 900
-         Table = 1170
+         Column = 4665
+         Alias = 2115
+         Table = 2310
          Output = 720
          Append = 1400
          NewValue = 1170
@@ -181,6 +187,12 @@ EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane2', @value = N'n Criteria
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'ViewSubCommissionPayments';
+
+
+
+
+
+
 
 
 GO

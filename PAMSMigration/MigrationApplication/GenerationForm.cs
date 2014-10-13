@@ -98,7 +98,7 @@ namespace MigrationApplication
         private delegate void UpdateDataSourceDelegate(Table dataToMerge);
         private void UpdateGridDataSource(Table t)
         {
-            schemaDS.TableSchema.AddTableSchemaRow(t.Id, t.Name, t.Schema, t.Schema + "." + t.Name, t.HasData);
+            schemaDS1.TableSchema.AddTableSchemaRow(t.Id, t.Name, t.Schema, t.Schema + "." + t.Name, t.HasData);
         }
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -392,6 +392,58 @@ namespace MigrationApplication
         {
             splashScreenManager1.CloseWaitForm();
             richTextBox.Text = strGen.ToString();
+        }
+
+        private void backgroundWorker3_DoWork(object sender, DoWorkEventArgs e)
+        {
+            
+            if (projectNew.Databases.Count == 0)
+            {
+                projectNew.ServerName = @".";
+                projectNew.UserName = "sa";
+                projectNew.Password = "welcome";
+                projectNew.IsWindowsAuthentication = true;
+                projectNew.Name = "Migration Script";
+                projectNew.CreateDate = System.DateTime.Now;
+                DataType.LoadHashTables(Application.ExecutablePath.Substring(0, Application.ExecutablePath.LastIndexOf("\\")) + "\\" + "DataTypesMapper.xml");
+                projectNew.DatabaseType = DatabaseTypes.SQLServer;
+                projectNew.CheckHasData = true;
+                projectNew.Connect();
+                projectNew.ExtractorManager.DatabaseReaders.GetDatabases(projectNew);
+            }
+            Database database = projectNew.GetDatabaseByName("PAMSDB");
+
+            #region Extrating Table Information
+            if (database.Tables != null && database.Tables.Count == 0)
+            {
+                projectNew.ExtractorManager.DatabaseReaders.GetTables(database);
+
+                foreach (Common.Entities.MetaDataSchema.Table tbl in database.Tables)
+                {
+
+                    projectNew.ExtractorManager.DatabaseReaders.GetColumns(tbl);
+                    if (Column.GetByName(tbl.Columns, "BranchID") != null)
+                        gridControl1.BeginInvoke(new UpdateDataSourceDelegate(UpdateGridDataSource), new object[] { tbl });
+                }
+
+            }
+
+
+            #endregion
+        }
+
+        private void backgroundWorker3_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            
+            
+            splashScreenManager2.CloseWaitForm();
+        }
+
+        private void simpleButton2_Click(object sender, EventArgs e)
+        {
+            splashScreenManager2.ShowWaitForm();
+            backgroundWorker3.RunWorkerAsync();
+
         }
     }
 }

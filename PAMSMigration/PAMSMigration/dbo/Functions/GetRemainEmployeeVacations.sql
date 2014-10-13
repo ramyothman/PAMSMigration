@@ -29,7 +29,7 @@ BEGIN
 	    
 	    	select @TotalDaysCasual = isnull(Sum(NumOfDays),0)  from [dbo].[EmployeeVacations] 
 	where ( (Year(StartDate) =   @Year   )  or ( Year(EndDate) =   @Year  )) and PersonID = @EmployeeID
-	    and ( VacationTypeID = 1 )
+	    and ( VacationTypeID in ( 1,9 ) )
 	--select @TotalDays = Sum(NumOfDays) from [dbo].[EmployeeVacations] 
 	--where (Year(StartDate) = @Year or Year(EndDate) = @Year) and PersonID = @EmployeeID
 	--    and (VacationTypeID = 1 or VacationTypeID = 2 )

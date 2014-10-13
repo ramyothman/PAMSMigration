@@ -1,13 +1,11 @@
 ﻿CREATE VIEW dbo.viewSubProjectTotals
 AS
-SELECT   *
-FROM         (SELECT   GetAllInquiries.CustomerID, GetAllInquiries.SupplierID, GetAllInquiries.InquiryStatus AS OfferStatus, Customers.CompanyName, Customers.CompanyCode, Suppliers.SupplierName, 
+SELECT     *
+FROM         (SELECT     GetAllInquiries.CustomerID, GetAllInquiries.SupplierID, GetAllInquiries.InquiryStatus AS OfferStatus, Customers.CompanyName, Customers.CompanyCode, Suppliers.SupplierName, 
                                               Orders.OrderDate, Orders.DeliveredON, Orders.Delivered, GetAllInquiries.InquiryDate, Orders.PriceInEuro, GetAllInquiries.QuotationPriceInEuro, Losts.ModifiedDate AS LostDate, 
                                               Orders.OrderStatusID, OrderStatus.Name AS OrderStatus, GetAllInquiries.OfferDate, Losts.LostReasonID, LostReasons.ReasonName, LostReasons.ReasonCode AS LostReasonCode, 
                                               GetAllInquiries.InquiryNumber, GetAllInquiries.InquiryTypeID, GetAllInquiries.InquiryStatusID, InquiryStatus.Name AS InquiryStatusName, Orders.IsSubOrder, 
-                                              GetAllInquiries.ProductTypeID, GetAllInquiries.IsSubOffer,
-PartialShipment.ShipmentDate, PartialShipment.PriceInEuro AS ShipmentPriceInEuro, 
-Orders.BackLog, Suppliers.IsPrincipale, 
+                                              GetAllInquiries.ProductTypeID, GetAllInquiries.IsSubOffer, PartialShipment.ShipmentDate, PartialShipment.PriceInEuro AS ShipmentPriceInEuro, Orders.BackLog, Suppliers.IsPrincipale, 
                                               Suppliers.HasSubSuppliers, GetAllInquiries.ProjectTypeID, GetAllInquiries.InquiryType, GetAllInquiries.ProjectStatus AS InquiryStatus, Orders.CompletedGoodsPaidON, 
                                               Orders.IsCompletedGoodsPaid, GetAllInquiries.BranchID, SupplierBranch.BranchID SupplierBranchID, Suppliers.IsGeneral, CompletedProjects.ModifiedDate AS CompletedOn, 
                                               [dbo].[GetTotalGoodsPaid](GetAllInquiries.InquiryNumber) PaidAmountInEuro, Row_Number() OVER (PARTITION BY GetAllInquiries.InquiryNumber
@@ -16,13 +14,14 @@ FROM         LostReasons RIGHT OUTER JOIN
                       Losts ON LostReasons.ID = Losts.LostReasonID RIGHT OUTER JOIN
                       CompletedProjects RIGHT OUTER JOIN
                       GetAllInquiries ON CompletedProjects.InquiryNumber = GetAllInquiries.InquiryNumber LEFT OUTER JOIN
-                     PartialShipment ON GetAllInquiries.InquiryNumber = PartialShipment.InquiryNumber LEFT OUTER JOIN
+                      PartialShipment ON GetAllInquiries.InquiryNumber = PartialShipment.InquiryNumber LEFT OUTER JOIN
                       InquiryStatus ON GetAllInquiries.InquiryStatusID = InquiryStatus.ID ON Losts.InquiryNumber = GetAllInquiries.InquiryNumber LEFT OUTER JOIN
                       Customers ON GetAllInquiries.CustomerID = Customers.CustomerID LEFT OUTER JOIN
                       Suppliers ON GetAllInquiries.SupplierID = Suppliers.SupplierID LEFT OUTER JOIN
                       Orders ON GetAllInquiries.InquiryNumber = Orders.InquiryNumber LEFT OUTER JOIN
                       OrderStatus ON Orders.OrderStatusID = OrderStatus.ID INNER JOIN
                       SupplierBranch ON Suppliers.SupplierID = SupplierBranch.SupplierID) AS t
+--WHERE     t .row = 1
 
 GO
 EXECUTE sp_addextendedproperty @name = N'MS_DiagramPane1', @value = N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
@@ -92,7 +91,7 @@ Begin DesignProperties =
    End
    Begin DiagramPane = 
       Begin Origin = 
-         Top = -1056
+         Top = -1440
          Left = 0
       End
       Begin Tables = 
@@ -168,6 +167,8 @@ Begin DesignProperties =
    End
 End
 ', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'VIEW', @level1name = N'viewSubProjectTotals';
+
+
 
 
 GO
